@@ -1,0 +1,7 @@
+#pragma version 10
+
+MainContract.MainContract.clear_state_program:
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:19
+    // class MainContract(py.ARC4Contract):
+    int 1
+    return

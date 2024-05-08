@@ -1,0 +1,382 @@
+#pragma version 10
+
+MainContract.MainContract.approval_program:
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:19
+    // class MainContract(py.ARC4Contract):
+    method "create(string)void"
+    method "update()void"
+    method "opt_in_or_out()void"
+    method "add_address_to_whitelist(byte[32],byte[32][])string"
+    method "is_on_whitelist(address)bool"
+    txna ApplicationArgs 0
+    match main_create_route@1 main_update_route@2 main_opt_in_or_out_route@3 main_add_address_to_whitelist_route@4 main_is_on_whitelist_route@5
+    err // reject transaction
+
+main_create_route@1:
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:23
+    // @abimethod(create='require')
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    !
+    assert // is creating
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:19
+    // class MainContract(py.ARC4Contract):
+    txna ApplicationArgs 1
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:23
+    // @abimethod(create='require')
+    callsub create
+    int 1
+    return
+
+main_update_route@2:
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:28
+    // @abimethod(allow_actions=["UpdateApplication", "DeleteApplication"])
+    int 1
+    txn OnCompletion
+    shl
+    int 48
+    &
+    assert // OnCompletion is one of UpdateApplication, DeleteApplication
+    txn ApplicationID
+    assert // is not creating
+    callsub update
+    int 1
+    return
+
+main_opt_in_or_out_route@3:
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:33
+    // @abimethod(allow_actions=["OptIn", "CloseOut"])
+    int 1
+    txn OnCompletion
+    shl
+    int 6
+    &
+    assert // OnCompletion is one of OptIn, CloseOut
+    txn ApplicationID
+    assert // is not creating
+    callsub opt_in_or_out
+    int 1
+    return
+
+main_add_address_to_whitelist_route@4:
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:38
+    // @abimethod
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    assert // is not creating
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:19
+    // class MainContract(py.ARC4Contract):
+    txna ApplicationArgs 1
+    txna ApplicationArgs 2
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:38
+    // @abimethod
+    callsub add_address_to_whitelist
+    byte 0x151f7c75
+    swap
+    concat
+    log
+    int 1
+    return
+
+main_is_on_whitelist_route@5:
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:73
+    // @abimethod
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    assert // is not creating
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:19
+    // class MainContract(py.ARC4Contract):
+    txna ApplicationArgs 1
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:73
+    // @abimethod
+    callsub is_on_whitelist
+    byte 0x151f7c75
+    swap
+    concat
+    log
+    int 1
+    return
+
+
+// MainContract.MainContract.create(name: bytes) -> void:
+create:
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:23-24
+    // @abimethod(create='require')
+    // def create(self, name: String) -> None:
+    proto 1 0
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:26
+    // self.app_name = name
+    byte "app_name"
+    frame_dig -1
+    app_global_put
+    retsub
+
+
+// MainContract.MainContract.update() -> void:
+update:
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:28-29
+    // @abimethod(allow_actions=["UpdateApplication", "DeleteApplication"])
+    // def update(self) -> None:
+    proto 0 0
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:31
+    // assert Global.creator_address == Txn.sender
+    global CreatorAddress
+    txn Sender
+    ==
+    assert
+    retsub
+
+
+// MainContract.MainContract.opt_in_or_out() -> void:
+opt_in_or_out:
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:33-34
+    // @abimethod(allow_actions=["OptIn", "CloseOut"])
+    // def opt_in_or_out(self) -> None:
+    proto 0 0
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:36
+    // return
+    retsub
+
+
+// MainContract.MainContract.add_address_to_whitelist(address: bytes, proof: bytes) -> bytes:
+add_address_to_whitelist:
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:38-43
+    // @abimethod
+    // def add_address_to_whitelist(
+    //     self,
+    //     address: Bytes32,
+    //     proof: DynamicArray[Bytes32]
+    // ) -> String:
+    proto 2 1
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:48
+    // py.ensure_budget(verifier_budget, fee_source=py.OpUpFeeSource.GroupCredit)
+    int 145000
+    int 0
+    callsub ensure_budget
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:50-54
+    // # The verifier expects public inputs to be in the curve field, but an
+    // # Algorand address might represent a number larger than the field
+    // # modulus, so to be safe we take the address modulo the field modulus
+    // address_mod = Bytes32.from_bytes(
+    //     (py.BigUInt.from_bytes(address.bytes) % curve_mod).bytes)
+    frame_dig -2
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:54
+    // (py.BigUInt.from_bytes(address.bytes) % curve_mod).bytes)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    b%
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:60
+    // DynamicArray(address_mod.copy())
+    byte 0x0001
+    swap
+    concat
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:58
+    // TemplateVar[UInt64]("VERIFIER_APP_ID"),
+    int 1001
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:56-61
+    // # Verify the proof by calling the deposit verifier app
+    // verified = verify_proof(
+    //     TemplateVar[UInt64]("VERIFIER_APP_ID"),
+    //     proof,
+    //     DynamicArray(address_mod.copy())
+    // )
+    frame_dig -1
+    uncover 2
+    callsub verify_proof
+    pop
+    frame_bury -1
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:62
+    // if not verified:
+    byte 0x00
+    ==
+    bz add_address_to_whitelist_after_if_else@2
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:63
+    // return(String("Proof verification failed"))
+    byte "\x00\x19Proof verification failed"
+    retsub
+
+add_address_to_whitelist_after_if_else@2:
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:67
+    // if not Txn.sender == account:
+    txn Sender
+    frame_dig -2
+    ==
+    bnz add_address_to_whitelist_after_if_else@4
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:68
+    // return(String("Sender address does not match authorized address"))
+    byte "\x000Sender address does not match authorized address"
+    retsub
+
+add_address_to_whitelist_after_if_else@4:
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:70
+    // self.whitelist[account] = True
+    frame_dig -2
+    byte "whitelist"
+    int 1
+    app_local_put
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:71
+    // return String("")
+    byte "\x00\x00"
+    retsub
+
+
+// algopy.ensure_budget(required_budget: uint64, fee_source: uint64) -> void:
+ensure_budget:
+    // <algopy>/algopy.py:11-17
+    proto 2 0
+    // <algopy>/algopy.py:18
+    frame_dig -2
+    int 10
+    +
+
+ensure_budget_while_top@1:
+    // <algopy>/algopy.py:19
+    frame_dig 0
+    global OpcodeBudget
+    >
+    bz ensure_budget_after_while@7
+    // <algopy>/algopy.py:20
+    itxn_begin
+    // <algopy>/algopy.py:21
+    int appl
+    itxn_field TypeEnum
+    // <algopy>/algopy.py:22
+    int DeleteApplication
+    itxn_field OnCompletion
+    // <algopy>/algopy.py:23
+    byte 0x068101
+    itxn_field ApprovalProgram
+    // <algopy>/algopy.py:24
+    byte 0x068101
+    itxn_field ClearStateProgram
+    // <algopy>/algopy.py:25-29
+    frame_dig -1
+    switch ensure_budget_switch_case_0@3 ensure_budget_switch_case_1@4
+    b ensure_budget_switch_case_next@6
+
+ensure_budget_switch_case_0@3:
+    // <algopy>/algopy.py:27
+    int 0
+    itxn_field Fee
+    b ensure_budget_switch_case_next@6
+
+ensure_budget_switch_case_1@4:
+    // <algopy>/algopy.py:29
+    global MinTxnFee
+    itxn_field Fee
+
+ensure_budget_switch_case_next@6:
+    // <algopy>/algopy.py:30
+    itxn_submit
+    b ensure_budget_while_top@1
+
+ensure_budget_after_while@7:
+    retsub
+
+
+// MainContract.verify_proof(app_id: uint64, proof: bytes, public_inputs: bytes) -> bytes, bytes, bytes:
+verify_proof:
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:84-89
+    // @subroutine
+    // def verify_proof(
+    //     app_id: UInt64,
+    //     proof: DynamicArray[Bytes32],
+    //     public_inputs: DynamicArray[Bytes32]
+    // ) -> Bool:
+    proto 3 3
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:91-97
+    // verified = itxn.ApplicationCall(
+    //     app_id=app_id,
+    //     fee=0,
+    //     app_args=(arc4_signature("verify(byte[32][],byte[32][])bool"),
+    //               proof.copy(), public_inputs.copy()),
+    //     on_completion=py.OnCompleteAction.NoOp
+    // ).submit().last_log
+    itxn_begin
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:96
+    // on_completion=py.OnCompleteAction.NoOp
+    int NoOp
+    itxn_field OnCompletion
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:94
+    // app_args=(arc4_signature("verify(byte[32][],byte[32][])bool"),
+    method "verify(byte[32][],byte[32][])bool"
+    itxn_field ApplicationArgs
+    frame_dig -2
+    itxn_field ApplicationArgs
+    frame_dig -1
+    itxn_field ApplicationArgs
+    frame_dig -3
+    itxn_field ApplicationID
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:91
+    // verified = itxn.ApplicationCall(
+    int appl
+    itxn_field TypeEnum
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:93
+    // fee=0,
+    int 0
+    itxn_field Fee
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:91-97
+    // verified = itxn.ApplicationCall(
+    //     app_id=app_id,
+    //     fee=0,
+    //     app_args=(arc4_signature("verify(byte[32][],byte[32][])bool"),
+    //               proof.copy(), public_inputs.copy()),
+    //     on_completion=py.OnCompleteAction.NoOp
+    // ).submit().last_log
+    itxn_submit
+    itxn LastLog
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:98
+    // return Bool.from_log(verified)
+    dup
+    extract 4 0
+    swap
+    extract 0 4
+    byte 0x151f7c75
+    ==
+    assert // ARC4 prefix is valid
+    frame_dig -2
+    frame_dig -1
+    retsub
+
+
+// MainContract.MainContract.is_on_whitelist(address: bytes) -> bytes:
+is_on_whitelist:
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:73-74
+    // @abimethod
+    // def is_on_whitelist(self, address: Address) -> Bool:
+    proto 1 1
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:77
+    // opted_in = account.is_opted_in(Global.current_application_id)
+    frame_dig -1
+    global CurrentApplicationID
+    app_opted_in
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:78
+    // if not opted_in:
+    bnz is_on_whitelist_after_if_else@2
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:79
+    // return Bool(False)
+    byte 0x00
+    retsub
+
+is_on_whitelist_after_if_else@2:
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:80
+    // whitelisted = self.whitelist.get(account, False)
+    frame_dig -1
+    int 0
+    byte "whitelist"
+    app_local_get_ex
+    int 0
+    cover 2
+    select
+    // /Users/giulio/dev/zkp/whitelist/MainContract.py:81
+    // return Bool(whitelisted)
+    byte 0x00
+    int 0
+    uncover 2
+    setbit
+    retsub

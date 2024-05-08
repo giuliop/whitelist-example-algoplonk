@@ -1,0 +1,2376 @@
+#pragma version 10
+
+Verifier.Verifier.approval_program:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:37
+    // class Verifier(py.ARC4Contract):
+    method "create(string)void"
+    method "update()void"
+    method "make_immutable()void"
+    method "verify(byte[32][],byte[32][])bool"
+    txna ApplicationArgs 0
+    match main_create_route@1 main_update_route@2 main_make_immutable_route@3 main_verify_route@4
+    err // reject transaction
+
+main_create_route@1:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:38
+    // @abimethod(create='require')
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    !
+    assert // is creating
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:37
+    // class Verifier(py.ARC4Contract):
+    txna ApplicationArgs 1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:38
+    // @abimethod(create='require')
+    callsub create
+    int 1
+    return
+
+main_update_route@2:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:44
+    // @abimethod(allow_actions=["UpdateApplication", "DeleteApplication"])
+    int 1
+    txn OnCompletion
+    shl
+    int 48
+    &
+    assert // OnCompletion is one of UpdateApplication, DeleteApplication
+    txn ApplicationID
+    assert // is not creating
+    callsub update
+    int 1
+    return
+
+main_make_immutable_route@3:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:51
+    // @abimethod
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    assert // is not creating
+    callsub make_immutable
+    int 1
+    return
+
+main_verify_route@4:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:57
+    // @abimethod
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    assert // is not creating
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:37
+    // class Verifier(py.ARC4Contract):
+    txna ApplicationArgs 1
+    txna ApplicationArgs 2
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:57
+    // @abimethod
+    callsub verify
+    byte 0x151f7c75
+    swap
+    concat
+    log
+    int 1
+    return
+
+
+// Verifier.Verifier.create(name: bytes) -> void:
+create:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:38-39
+    // @abimethod(create='require')
+    // def create(self, name: String) -> None:
+    proto 1 0
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:41
+    // self.app_name = name
+    byte "app_name"
+    frame_dig -1
+    app_global_put
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:42
+    // self.immutable = False
+    byte "immutable"
+    int 0
+    app_global_put
+    retsub
+
+
+// Verifier.Verifier.update() -> void:
+update:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:44-45
+    // @abimethod(allow_actions=["UpdateApplication", "DeleteApplication"])
+    // def update(self) -> None:
+    proto 0 0
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:48
+    // assert not self.immutable
+    int 0
+    byte "immutable"
+    app_global_get_ex
+    assert // check immutable exists
+    !
+    assert
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:49
+    // assert py.Global.creator_address == py.Txn.sender
+    global CreatorAddress
+    txn Sender
+    ==
+    assert
+    retsub
+
+
+// Verifier.Verifier.make_immutable() -> void:
+make_immutable:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:51-52
+    // @abimethod
+    // def make_immutable(self) -> None:
+    proto 0 0
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:54
+    // assert py.Global.creator_address == py.Txn.sender
+    global CreatorAddress
+    txn Sender
+    ==
+    assert
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:55
+    // self.immutable = True
+    byte "immutable"
+    int 1
+    app_global_put
+    retsub
+
+
+// Verifier.Verifier.verify(proof: bytes, public_inputs: bytes) -> bytes:
+verify:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:57-61
+    // @abimethod
+    // def verify(self,
+    //            proof: DynamicArray[Bytes32],
+    // 		   public_inputs: DynamicArray[Bytes32],
+    // 		   ) -> arc4.Bool:
+    proto 2 1
+    int 0
+    dupn 16
+    byte ""
+    dupn 4
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:67-68
+    // # check proof and public inputs lengths
+    // assert proof.length == 26
+    frame_dig -2
+    int 0
+    extract_uint16
+    dup
+    int 26
+    ==
+    assert
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:69
+    // assert public_inputs.length == 1
+    frame_dig -1
+    int 0
+    extract_uint16
+    dup
+    cover 2
+    int 1
+    ==
+    assert
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:89-91
+    // # Read proof #
+    // # wires commitments
+    // L_COM = proof[0].bytes + proof[1].bytes
+    dup
+    assert // Index access is out of bounds
+    frame_dig -2
+    extract 2 0
+    dup
+    extract 0 32
+    cover 2
+    int 1
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    extract 32 32
+    uncover 3
+    swap
+    concat
+    cover 2
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:92
+    // R_COM = proof[2].bytes + proof[3].bytes
+    int 2
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    extract 64 32
+    cover 2
+    int 3
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    extract 96 32
+    uncover 3
+    swap
+    concat
+    cover 2
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:93
+    // O_COM = proof[4].bytes + proof[5].bytes
+    int 4
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    extract 128 32
+    cover 2
+    int 5
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    extract 160 32
+    uncover 3
+    swap
+    concat
+    cover 2
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:95-96
+    // # h = h_0 + x^{n+2}h_1 + x^{2(n+2)}h_
+    // H_0 = proof[6].bytes + proof[7].bytes
+    int 6
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    extract 192 32
+    cover 2
+    int 7
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    extract 224 32
+    uncover 3
+    swap
+    concat
+    cover 2
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:97
+    // H_1 = proof[8].bytes + proof[9].bytes
+    int 8
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    int 256
+    int 32
+    extract3
+    cover 2
+    int 9
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    int 288
+    int 32
+    extract3
+    uncover 3
+    swap
+    concat
+    cover 2
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:98
+    // H_2 = proof[10].bytes + proof[11].bytes
+    int 10
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    int 320
+    int 32
+    extract3
+    cover 2
+    int 11
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    int 352
+    int 32
+    extract3
+    uncover 3
+    swap
+    concat
+    cover 2
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:100-101
+    // # wire values at zeta
+    // L_AT_Z = proof[12].copy()
+    int 12
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    int 384
+    int 32
+    extract3
+    dup
+    cover 3
+    cover 3
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:102
+    // R_AT_Z = proof[13].copy()
+    int 13
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    int 416
+    int 32
+    extract3
+    cover 3
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:103
+    // O_AT_Z = proof[14].copy()
+    int 14
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    int 448
+    int 32
+    extract3
+    cover 3
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:105
+    // S1_AT_Z = proof[15].copy() 						  # s1(zeta)
+    int 15
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    int 480
+    int 32
+    extract3
+    cover 3
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:106
+    // S2_AT_Z = proof[16].copy() 						  # s2(zeta)
+    int 16
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    int 512
+    int 32
+    extract3
+    cover 3
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:107
+    // GRAND_PRODUCT = proof[17].bytes + proof[18].bytes # z(x)
+    int 17
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    int 544
+    int 32
+    extract3
+    cover 2
+    int 18
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    int 576
+    int 32
+    extract3
+    uncover 3
+    swap
+    concat
+    cover 3
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:108
+    // GRAND_PRODUCT_AT_Z_OMEGA = proof[19].copy()       # z(w*zeta)
+    int 19
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    int 608
+    int 32
+    extract3
+    cover 3
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:109
+    // QUOTIENT_POLY_AT_Z = proof[20].copy()             # t(zeta)
+    int 20
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    int 640
+    int 32
+    extract3
+    cover 3
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:110
+    // LINEAR_POLY_AT_Z = proof[21].copy()               # r(zeta)
+    int 21
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    int 672
+    int 32
+    extract3
+    cover 3
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:112-113
+    // # Folded proof for opening of H, linear poly, l, r, o, s1, s2, qc
+    // BATCH_OPENING_AT_Z = proof[22].bytes + proof[23].bytes
+    int 22
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    int 704
+    int 32
+    extract3
+    cover 2
+    int 23
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    int 736
+    int 32
+    extract3
+    uncover 3
+    swap
+    concat
+    cover 3
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:114
+    // OPENING_AT_Z_OMEGA = proof[24].bytes + proof[25].bytes
+    int 24
+    dig 2
+    <
+    assert // Index access is out of bounds
+    dup
+    int 768
+    int 32
+    extract3
+    cover 2
+    int 25
+    uncover 2
+    <
+    assert // Index access is out of bounds
+    int 800
+    int 32
+    extract3
+    concat
+    swap
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:116-117
+    // ### check proof public inputs are well-formed ###
+    // if (BigUInt.from_bytes(L_AT_Z.bytes) >= q
+    b>=
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:116-124
+    // ### check proof public inputs are well-formed ###
+    // if (BigUInt.from_bytes(L_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(R_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(O_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(S1_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(S2_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(GRAND_PRODUCT_AT_Z_OMEGA.bytes) >= q
+    // 		or BigUInt.from_bytes(QUOTIENT_POLY_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(LINEAR_POLY_AT_Z.bytes) >= q):
+    bnz verify_if_body@8
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:118
+    // or BigUInt.from_bytes(R_AT_Z.bytes) >= q
+    frame_dig 30
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:118
+    // or BigUInt.from_bytes(R_AT_Z.bytes) >= q
+    b>=
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:116-124
+    // ### check proof public inputs are well-formed ###
+    // if (BigUInt.from_bytes(L_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(R_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(O_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(S1_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(S2_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(GRAND_PRODUCT_AT_Z_OMEGA.bytes) >= q
+    // 		or BigUInt.from_bytes(QUOTIENT_POLY_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(LINEAR_POLY_AT_Z.bytes) >= q):
+    bnz verify_if_body@8
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:119
+    // or BigUInt.from_bytes(O_AT_Z.bytes) >= q
+    frame_dig 31
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:119
+    // or BigUInt.from_bytes(O_AT_Z.bytes) >= q
+    b>=
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:116-124
+    // ### check proof public inputs are well-formed ###
+    // if (BigUInt.from_bytes(L_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(R_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(O_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(S1_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(S2_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(GRAND_PRODUCT_AT_Z_OMEGA.bytes) >= q
+    // 		or BigUInt.from_bytes(QUOTIENT_POLY_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(LINEAR_POLY_AT_Z.bytes) >= q):
+    bnz verify_if_body@8
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:120
+    // or BigUInt.from_bytes(S1_AT_Z.bytes) >= q
+    frame_dig 32
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:120
+    // or BigUInt.from_bytes(S1_AT_Z.bytes) >= q
+    b>=
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:116-124
+    // ### check proof public inputs are well-formed ###
+    // if (BigUInt.from_bytes(L_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(R_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(O_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(S1_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(S2_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(GRAND_PRODUCT_AT_Z_OMEGA.bytes) >= q
+    // 		or BigUInt.from_bytes(QUOTIENT_POLY_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(LINEAR_POLY_AT_Z.bytes) >= q):
+    bnz verify_if_body@8
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:121
+    // or BigUInt.from_bytes(S2_AT_Z.bytes) >= q
+    frame_dig 33
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:121
+    // or BigUInt.from_bytes(S2_AT_Z.bytes) >= q
+    b>=
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:116-124
+    // ### check proof public inputs are well-formed ###
+    // if (BigUInt.from_bytes(L_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(R_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(O_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(S1_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(S2_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(GRAND_PRODUCT_AT_Z_OMEGA.bytes) >= q
+    // 		or BigUInt.from_bytes(QUOTIENT_POLY_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(LINEAR_POLY_AT_Z.bytes) >= q):
+    bnz verify_if_body@8
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:122
+    // or BigUInt.from_bytes(GRAND_PRODUCT_AT_Z_OMEGA.bytes) >= q
+    frame_dig 35
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:122
+    // or BigUInt.from_bytes(GRAND_PRODUCT_AT_Z_OMEGA.bytes) >= q
+    b>=
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:116-124
+    // ### check proof public inputs are well-formed ###
+    // if (BigUInt.from_bytes(L_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(R_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(O_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(S1_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(S2_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(GRAND_PRODUCT_AT_Z_OMEGA.bytes) >= q
+    // 		or BigUInt.from_bytes(QUOTIENT_POLY_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(LINEAR_POLY_AT_Z.bytes) >= q):
+    bnz verify_if_body@8
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:123
+    // or BigUInt.from_bytes(QUOTIENT_POLY_AT_Z.bytes) >= q
+    frame_dig 36
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:123
+    // or BigUInt.from_bytes(QUOTIENT_POLY_AT_Z.bytes) >= q
+    b>=
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:116-124
+    // ### check proof public inputs are well-formed ###
+    // if (BigUInt.from_bytes(L_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(R_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(O_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(S1_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(S2_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(GRAND_PRODUCT_AT_Z_OMEGA.bytes) >= q
+    // 		or BigUInt.from_bytes(QUOTIENT_POLY_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(LINEAR_POLY_AT_Z.bytes) >= q):
+    bnz verify_if_body@8
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:124
+    // or BigUInt.from_bytes(LINEAR_POLY_AT_Z.bytes) >= q):
+    frame_dig 37
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:124
+    // or BigUInt.from_bytes(LINEAR_POLY_AT_Z.bytes) >= q):
+    b>=
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:116-124
+    // ### check proof public inputs are well-formed ###
+    // if (BigUInt.from_bytes(L_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(R_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(O_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(S1_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(S2_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(GRAND_PRODUCT_AT_Z_OMEGA.bytes) >= q
+    // 		or BigUInt.from_bytes(QUOTIENT_POLY_AT_Z.bytes) >= q
+    // 		or BigUInt.from_bytes(LINEAR_POLY_AT_Z.bytes) >= q):
+    bz verify_after_if_else@9
+
+verify_if_body@8:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:125
+    // return arc4.Bool(False)
+    byte 0x00
+    frame_bury 0
+    retsub
+
+verify_after_if_else@9:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:127
+    // for i in urange(public_inputs.length):
+    int 0
+    frame_bury 20
+
+verify_for_header@10:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:127
+    // for i in urange(public_inputs.length):
+    frame_dig 20
+    frame_dig 22
+    <
+    dup
+    frame_bury 18
+    bz verify_after_for@16
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:128
+    // if BigUInt.from_bytes(public_inputs[i].bytes) >= q:
+    frame_dig 18
+    assert // Index access is out of bounds
+    frame_dig -1
+    extract 2 0
+    frame_dig 20
+    int 32
+    *
+    int 32
+    extract3
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:128
+    // if BigUInt.from_bytes(public_inputs[i].bytes) >= q:
+    b>=
+    bz verify_after_if_else@13
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:129
+    // return arc4.Bool(False)
+    byte 0x00
+    frame_bury 0
+    retsub
+
+verify_after_if_else@13:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:127
+    // for i in urange(public_inputs.length):
+    frame_dig 20
+    int 1
+    +
+    frame_bury 20
+    b verify_for_header@10
+
+verify_after_for@16:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:136
+    // public_inputs_bytes = Bytes(b'')
+    byte ""
+    frame_bury 9
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:137
+    // for i in urange(public_inputs.length):
+    int 0
+    frame_bury 20
+
+verify_for_header@17:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:137
+    // for i in urange(public_inputs.length):
+    frame_dig 20
+    frame_dig 22
+    <
+    dup
+    frame_bury 19
+    bz verify_after_for@21
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:138
+    // public_inputs_bytes += public_inputs[i].bytes
+    frame_dig 19
+    assert // Index access is out of bounds
+    frame_dig -1
+    extract 2 0
+    frame_dig 20
+    dup
+    cover 2
+    int 32
+    *
+    int 32
+    extract3
+    frame_dig 9
+    swap
+    concat
+    frame_bury 9
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:137
+    // for i in urange(public_inputs.length):
+    int 1
+    +
+    frame_bury 20
+    b verify_for_header@17
+
+verify_after_for@21:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:140
+    // gamma_pre = sha256(b'gamma' + VK_S1 + VK_S2 + VK_S3 + VK_QL + VK_QR + VK_QM + VK_QO + VK_QK
+    byte 0x67616d6d612c470ee98067e88a6f598fcf466dbb1347c6d37fd29469d58f56148f3b771d1a2231c4c19478ed72b24e62019543668746651759eeeb234b68a11a1273c12f4b13ef02390af37d851ece9a4f8b7705561a389681f3c380aef62cd9ff497ceb3412aac6955b0319626cb853ea937cbfd126047033302308758baa301c17d307751dc0f72e11743f4de272e2472f5442c2a877f9e42590c09639f5f248a761bb0623867e6560f209589bce52cbd0cc8fd5f943df4411c1428e804736f3527083c5305c147b6a09d2f7e2acdf861851b8ac623d25a75597d35ba3735a58e67c9f6f129928ef2bb2e2ce54ab6eda80aaf95f7d245d51ef945fe69f40064aca3bd4022f68cd6b764d1e653371272e3046a2558ab38ce37ecbc054bb7df37c31ee26392311d17830aa7d8795967086c0e4d4597d122176edce571c33a72b97733893961128d08f95967307ad395ce4e44be3e47b2b9c7f45de968b8c9d16bb2241cde2163c009aa8e38add58f57744e9cf748aa76eef80927d07f919653581ef52a9be08d5e3211945e1064d319efc2aa9e80e349a8f52a79f0b5e0195d3b7051e3fd22839c621b767b84833009f879b41d5ed786b90c6fb7929bd917d2b958db887d219fb4308d898dd03703da497566a1dfb167c0bb51a854be87c89d6d4be95a5ed02fb415e2059d31a2224f79f5069199ef99d9c40f39bfe8324aacfd438e26fbd
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:140-141
+    // gamma_pre = sha256(b'gamma' + VK_S1 + VK_S2 + VK_S3 + VK_QL + VK_QR + VK_QM + VK_QO + VK_QK
+    // 				   + public_inputs_bytes + L_COM + R_COM + O_COM)
+    frame_dig 9
+    concat
+    frame_dig 23
+    concat
+    frame_dig 24
+    concat
+    frame_dig 25
+    concat
+    sha256
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:142
+    // beta_pre = sha256(b'beta' + gamma_pre)
+    byte "beta"
+    dig 1
+    concat
+    sha256
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:143
+    // alpha_pre = sha256(b'alpha' + beta_pre + GRAND_PRODUCT)
+    byte "alpha"
+    dig 1
+    concat
+    frame_dig 34
+    concat
+    sha256
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:144
+    // zeta_pre = sha256(b'zeta' + alpha_pre + H_0 + H_1 + H_2)
+    byte "zeta"
+    dig 1
+    concat
+    frame_dig 26
+    concat
+    frame_dig 27
+    concat
+    frame_dig 28
+    concat
+    sha256
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:146
+    // gamma = curvemod(gamma_pre)
+    uncover 3
+    callsub curvemod
+    frame_bury 6
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:147
+    // beta = curvemod(beta_pre)
+    uncover 2
+    callsub curvemod
+    frame_bury 5
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:148
+    // alpha = curvemod(alpha_pre)
+    swap
+    callsub curvemod
+    frame_bury 2
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:149
+    // zeta = curvemod(zeta_pre)
+    callsub curvemod
+    dup
+    frame_bury 15
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:73
+    // VK_DOMAIN_SIZE = BigUInt(512)
+    byte 0x0200
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:151-152
+    // # Zz is eval of Xⁿ-1 at zeta
+    // Zz = (expmod(zeta, VK_DOMAIN_SIZE, q) + q - BigUInt(1)) % q
+    callsub expmod
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:151-152
+    // # Zz is eval of Xⁿ-1 at zeta
+    // Zz = (expmod(zeta, VK_DOMAIN_SIZE, q) + q - BigUInt(1)) % q
+    b+
+    byte 0x01
+    b-
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:151-152
+    // # Zz is eval of Xⁿ-1 at zeta
+    // Zz = (expmod(zeta, VK_DOMAIN_SIZE, q) + q - BigUInt(1)) % q
+    b%
+    dup
+    frame_bury 1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:74
+    // VK_INV_DOMAIN_SIZE = BigUInt(21845492397480214137827955734036069473141043376196471776620668631523902619649)
+    byte 0x304c1c4ba7c10759a3741d93a64097b0f99fce54557c93d8fb40049926080001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:154-155
+    // # zn is Zz * 1/n
+    // zn = (Zz * VK_INV_DOMAIN_SIZE) % q
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:154-155
+    // # zn is Zz * 1/n
+    // zn = (Zz * VK_INV_DOMAIN_SIZE) % q
+    b%
+    frame_bury 16
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:157-158
+    // # Let's prepare to interpolate the public inputs
+    // w_ = BigUInt(1)
+    byte 0x01
+    frame_bury 14
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:159
+    // batch = DynamicArray[UInt256]()
+    byte 0x0000
+    frame_bury 4
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:160
+    // for i in urange(VK_NB_PUBLIC_INPUTS):
+    int 0
+    frame_bury 20
+
+verify_for_header@22:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:160
+    // for i in urange(VK_NB_PUBLIC_INPUTS):
+    frame_dig 20
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:71-72
+    // # Read verifying key
+    // VK_NB_PUBLIC_INPUTS = UInt64(1)
+    int 1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:160
+    // for i in urange(VK_NB_PUBLIC_INPUTS):
+    <
+    bz verify_after_for@26
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:161
+    // x = (zeta + q - w_) % q
+    frame_dig 15
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:161
+    // x = (zeta + q - w_) % q
+    b+
+    frame_dig 14
+    dup
+    cover 2
+    b-
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:161
+    // x = (zeta + q - w_) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:162
+    // batch.append(UInt256(x))
+    frame_dig 4
+    extract 2 0
+    swap
+    dup
+    len
+    int 32
+    <=
+    assert // overflow
+    int 32
+    bzero
+    b|
+    concat
+    dup
+    len
+    int 32
+    /
+    itob
+    extract 6 0
+    swap
+    concat
+    frame_bury 4
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:75
+    // VK_OMEGA = BigUInt(6837567842312086091520287814181175430087169027974246751610506942214842701774)
+    byte 0x0f1ded1ef6e72f5bffc02c0edd9b0675e8302a41fc782d75893a7fa1470157ce
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:163
+    // w_ = (w_ * VK_OMEGA) % q
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:163
+    // w_ = (w_ * VK_OMEGA) % q
+    b%
+    frame_bury 14
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:160
+    // for i in urange(VK_NB_PUBLIC_INPUTS):
+    frame_dig 20
+    int 1
+    +
+    frame_bury 20
+    b verify_for_header@22
+
+verify_after_for@26:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:167
+    // prev = BigUInt(1)
+    byte 0x01
+    frame_bury 8
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:168
+    // temp.append(UInt256(prev))
+    byte 0x00010000000000000000000000000000000000000000000000000000000000000001
+    frame_bury 13
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:169
+    // for x256 in batch:
+    frame_dig 4
+    dup
+    int 0
+    extract_uint16
+    frame_bury 17
+    extract 2 0
+    frame_bury 3
+    int 0
+    frame_bury 21
+
+verify_for_header@27:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:169
+    // for x256 in batch:
+    frame_dig 21
+    frame_dig 17
+    <
+    bz verify_after_for@30
+    frame_dig 21
+    dup
+    int 32
+    *
+    frame_dig 3
+    swap
+    int 32
+    extract3
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:171
+    // y = (x * prev) % q
+    frame_dig 8
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:171
+    // y = (x * prev) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:172
+    // temp.append(UInt256(y))
+    frame_dig 13
+    extract 2 0
+    swap
+    dup
+    len
+    int 32
+    <=
+    assert // overflow
+    int 32
+    bzero
+    dig 1
+    b|
+    uncover 2
+    swap
+    concat
+    dup
+    len
+    int 32
+    /
+    itob
+    extract 6 0
+    swap
+    concat
+    frame_bury 13
+    swap
+    int 1
+    +
+    frame_bury 21
+    frame_bury 8
+    b verify_for_header@27
+
+verify_after_for@30:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:174
+    // inv = expmod(prev, q - BigUInt(2), q)
+    frame_dig 8
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffffff
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:174
+    // inv = expmod(prev, q - BigUInt(2), q)
+    callsub expmod
+    frame_bury 7
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:71-72
+    // # Read verifying key
+    // VK_NB_PUBLIC_INPUTS = UInt64(1)
+    int 1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:175
+    // i = VK_NB_PUBLIC_INPUTS
+    frame_bury 20
+
+verify_while_top@31:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:176
+    // while i > 0:
+    frame_dig 20
+    bz verify_after_while@33
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:177
+    // tmp = BigUInt.from_bytes(batch[i-1].bytes)
+    frame_dig 20
+    int 1
+    -
+    dup
+    frame_bury 20
+    frame_dig 4
+    dup
+    cover 2
+    int 0
+    extract_uint16
+    dig 1
+    >
+    assert // Index access is out of bounds
+    dig 1
+    extract 2 0
+    dig 1
+    int 32
+    *
+    dup
+    cover 3
+    int 32
+    extract3
+    cover 2
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:178
+    // cur = (inv * BigUInt.from_bytes(temp[i-1].bytes)) % q
+    frame_dig 13
+    dup
+    int 0
+    extract_uint16
+    uncover 2
+    >
+    assert // Index access is out of bounds
+    extract 2 0
+    dig 1
+    int 32
+    extract3
+    frame_dig 7
+    dup
+    cover 3
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:178
+    // cur = (inv * BigUInt.from_bytes(temp[i-1].bytes)) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:179
+    // batch[i-1] = UInt256(cur)
+    dup
+    len
+    int 32
+    <=
+    assert // overflow
+    int 32
+    bzero
+    b|
+    swap
+    int 2
+    +
+    uncover 4
+    swap
+    uncover 2
+    replace3
+    frame_bury 4
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:180
+    // inv = (inv * tmp) % q
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:180
+    // inv = (inv * tmp) % q
+    b%
+    frame_bury 7
+    b verify_while_top@31
+
+verify_after_while@33:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:183-184
+    // # We can now interpolate the public inputs (PI)
+    // w_ = BigUInt(1)
+    byte 0x01
+    frame_bury 14
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:185
+    // for i in urange(VK_NB_PUBLIC_INPUTS):
+    int 0
+    frame_bury 20
+
+verify_for_header@34:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:185
+    // for i in urange(VK_NB_PUBLIC_INPUTS):
+    frame_dig 20
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:71-72
+    // # Read verifying key
+    // VK_NB_PUBLIC_INPUTS = UInt64(1)
+    int 1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:185
+    // for i in urange(VK_NB_PUBLIC_INPUTS):
+    <
+    bz verify_after_for@38
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:186
+    // batch[i] = UInt256((w_ * ((BigUInt.from_bytes(batch[i].bytes) * zn)
+    frame_dig 4
+    dup
+    int 0
+    extract_uint16
+    frame_dig 20
+    dup
+    uncover 2
+    <
+    assert // Index access is out of bounds
+    dig 1
+    extract 2 0
+    dig 1
+    int 32
+    *
+    dup
+    cover 2
+    int 32
+    extract3
+    frame_dig 16
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:186-187
+    // batch[i] = UInt256((w_ * ((BigUInt.from_bytes(batch[i].bytes) * zn)
+    // 					% q)) % q)
+    b%
+    frame_dig 14
+    dup
+    uncover 2
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:186-187
+    // batch[i] = UInt256((w_ * ((BigUInt.from_bytes(batch[i].bytes) * zn)
+    // 					% q)) % q)
+    b%
+    dup
+    len
+    int 32
+    <=
+    assert // overflow
+    int 32
+    bzero
+    b|
+    uncover 2
+    int 2
+    +
+    uncover 4
+    swap
+    uncover 2
+    replace3
+    frame_bury 4
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:75
+    // VK_OMEGA = BigUInt(6837567842312086091520287814181175430087169027974246751610506942214842701774)
+    byte 0x0f1ded1ef6e72f5bffc02c0edd9b0675e8302a41fc782d75893a7fa1470157ce
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:188
+    // w_ = (w_ * VK_OMEGA) % q
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:188
+    // w_ = (w_ * VK_OMEGA) % q
+    b%
+    frame_bury 14
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:185
+    // for i in urange(VK_NB_PUBLIC_INPUTS):
+    int 1
+    +
+    frame_bury 20
+    b verify_for_header@34
+
+verify_after_for@38:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:191
+    // PI = BigUInt(0)
+    byte 0x
+    frame_bury 0
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:192
+    // for i in urange(VK_NB_PUBLIC_INPUTS):
+    int 0
+    frame_bury 20
+
+verify_for_header@39:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:192
+    // for i in urange(VK_NB_PUBLIC_INPUTS):
+    frame_dig 20
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:71-72
+    // # Read verifying key
+    // VK_NB_PUBLIC_INPUTS = UInt64(1)
+    int 1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:192
+    // for i in urange(VK_NB_PUBLIC_INPUTS):
+    <
+    bz verify_after_for@43
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:193
+    // tmp = (BigUInt.from_bytes(batch[i].bytes)
+    frame_dig 4
+    dup
+    int 0
+    extract_uint16
+    frame_dig 20
+    dup
+    uncover 2
+    <
+    assert // Index access is out of bounds
+    swap
+    extract 2 0
+    dig 1
+    int 32
+    *
+    dup
+    cover 3
+    int 32
+    extract3
+    cover 2
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:194
+    // * BigUInt.from_bytes(public_inputs[i].bytes)) % q
+    dup
+    frame_dig 22
+    <
+    assert // Index access is out of bounds
+    frame_dig -1
+    extract 2 0
+    uncover 2
+    int 32
+    extract3
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:193-194
+    // tmp = (BigUInt.from_bytes(batch[i].bytes)
+    // 	   * BigUInt.from_bytes(public_inputs[i].bytes)) % q
+    uncover 2
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:193-194
+    // tmp = (BigUInt.from_bytes(batch[i].bytes)
+    // 	   * BigUInt.from_bytes(public_inputs[i].bytes)) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:195
+    // PI = (PI + tmp) % q
+    frame_dig 0
+    b+
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:195
+    // PI = (PI + tmp) % q
+    b%
+    frame_bury 0
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:192
+    // for i in urange(VK_NB_PUBLIC_INPUTS):
+    int 1
+    +
+    frame_bury 20
+    b verify_for_header@39
+
+verify_after_for@43:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:197-198
+    // # compute alpha2Lagrange: alpha**2 * (z**n - 1) / (z - 1)
+    // res = (zeta + q - BigUInt(1)) % q
+    frame_dig 15
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:197-198
+    // # compute alpha2Lagrange: alpha**2 * (z**n - 1) / (z - 1)
+    // res = (zeta + q - BigUInt(1)) % q
+    b+
+    byte 0x01
+    b-
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:197-198
+    // # compute alpha2Lagrange: alpha**2 * (z**n - 1) / (z - 1)
+    // res = (zeta + q - BigUInt(1)) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:199
+    // res = expmod(res, q - BigUInt(2), q)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffffff
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:199
+    // res = expmod(res, q - BigUInt(2), q)
+    callsub expmod
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:200
+    // res = (res * zn) % q
+    frame_dig 16
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:200
+    // res = (res * zn) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:201
+    // res = (res * alpha) % q
+    frame_dig 2
+    dup
+    cover 2
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:201
+    // res = (res * alpha) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:202
+    // res = (res * alpha) % q
+    dig 1
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:202
+    // res = (res * alpha) % q
+    b%
+    dup
+    cover 2
+    frame_bury 10
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:205-206
+    // # verify quotient polynomial evaluation at zeta
+    // s1 = (BigUInt.from_bytes(S1_AT_Z.bytes) * beta) % q
+    frame_dig 32
+    frame_dig 5
+    dup
+    cover 2
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:205-206
+    // # verify quotient polynomial evaluation at zeta
+    // s1 = (BigUInt.from_bytes(S1_AT_Z.bytes) * beta) % q
+    b%
+    dup
+    frame_bury 11
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:207
+    // s1 = (s1 + gamma + BigUInt.from_bytes(L_AT_Z.bytes)) % q
+    frame_dig 6
+    dup
+    cover 3
+    b+
+    frame_dig 29
+    b+
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:207
+    // s1 = (s1 + gamma + BigUInt.from_bytes(L_AT_Z.bytes)) % q
+    b%
+    cover 2
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:209
+    // s2 = (BigUInt.from_bytes(S2_AT_Z.bytes) * beta) % q
+    frame_dig 33
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:209
+    // s2 = (BigUInt.from_bytes(S2_AT_Z.bytes) * beta) % q
+    b%
+    dup
+    frame_bury 12
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:210
+    // s2 = (s2 + gamma + BigUInt.from_bytes(R_AT_Z.bytes)) % q
+    dig 1
+    b+
+    frame_dig 30
+    b+
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:210
+    // s2 = (s2 + gamma + BigUInt.from_bytes(R_AT_Z.bytes)) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:212
+    // o = (BigUInt.from_bytes(O_AT_Z.bytes) + gamma) % q
+    frame_dig 31
+    uncover 2
+    b+
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:212
+    // o = (BigUInt.from_bytes(O_AT_Z.bytes) + gamma) % q
+    b%
+    swap
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:214
+    // s1 = (s1 * s2) % q
+    uncover 2
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:214
+    // s1 = (s1 * s2) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:215
+    // s1 = (s1 * o) % q
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:215
+    // s1 = (s1 * o) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:216
+    // s1 = (s1 * alpha) % q
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:216
+    // s1 = (s1 * alpha) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:217
+    // s1 = (s1 * BigUInt.from_bytes(GRAND_PRODUCT_AT_Z_OMEGA.bytes)) % q
+    frame_dig 35
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:217
+    // s1 = (s1 * BigUInt.from_bytes(GRAND_PRODUCT_AT_Z_OMEGA.bytes)) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:219
+    // quot = (BigUInt.from_bytes(LINEAR_POLY_AT_Z.bytes) + PI + s1 + q
+    frame_dig 37
+    frame_dig 0
+    b+
+    b+
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:219
+    // quot = (BigUInt.from_bytes(LINEAR_POLY_AT_Z.bytes) + PI + s1 + q
+    b+
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:219-220
+    // quot = (BigUInt.from_bytes(LINEAR_POLY_AT_Z.bytes) + PI + s1 + q
+    // 						   - alpha2Lagrange) % q
+    swap
+    b-
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:219-220
+    // quot = (BigUInt.from_bytes(LINEAR_POLY_AT_Z.bytes) + PI + s1 + q
+    // 						   - alpha2Lagrange) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:222
+    // s2 = (BigUInt.from_bytes(QUOTIENT_POLY_AT_Z.bytes) * Zz) % q
+    frame_dig 36
+    frame_dig 1
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:222
+    // s2 = (BigUInt.from_bytes(QUOTIENT_POLY_AT_Z.bytes) * Zz) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:224
+    // if quot != s2:
+    b!=
+    bz verify_after_if_else@45
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:225
+    // return arc4.Bool(False)
+    byte 0x00
+    frame_bury 0
+    retsub
+
+verify_after_if_else@45:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:229
+    // zn2 = expmod(zeta, n2, q)
+    frame_dig 15
+    dup
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:227-228
+    // # compute the folded commitment to H
+    // n2 = VK_DOMAIN_SIZE + BigUInt(2)
+    byte 0x0202
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:229
+    // zn2 = expmod(zeta, n2, q)
+    callsub expmod
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:230
+    // folded_h = ec.scalar_mul(EC.BN254g1, H_2, zn2.bytes)
+    frame_dig 28
+    dig 1
+    ec_scalar_mul BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:231
+    // folded_h = ec.add(EC.BN254g1, folded_h, H_1)
+    frame_dig 27
+    ec_add BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:232
+    // folded_h = ec.scalar_mul(EC.BN254g1, folded_h, zn2.bytes)
+    swap
+    ec_scalar_mul BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:233
+    // folded_h = ec.add(EC.BN254g1, folded_h, H_0)
+    frame_dig 26
+    ec_add BN254g1
+    swap
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:235-236
+    // # compute commitment to linearization polynomial
+    // u = (BigUInt.from_bytes(GRAND_PRODUCT_AT_Z_OMEGA.bytes) * beta) % q
+    frame_dig 35
+    dup
+    cover 3
+    frame_dig 5
+    dup
+    cover 2
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:235-236
+    // # compute commitment to linearization polynomial
+    // u = (BigUInt.from_bytes(GRAND_PRODUCT_AT_Z_OMEGA.bytes) * beta) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:238
+    // v = (v + BigUInt.from_bytes(L_AT_Z.bytes) + gamma) % q
+    frame_dig 11
+    frame_dig 29
+    dup
+    cover 4
+    b+
+    frame_dig 6
+    dup
+    cover 2
+    b+
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:238
+    // v = (v + BigUInt.from_bytes(L_AT_Z.bytes) + gamma) % q
+    b%
+    swap
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:240
+    // w = (w + BigUInt.from_bytes(R_AT_Z.bytes) + gamma) % q
+    frame_dig 12
+    frame_dig 30
+    dup
+    cover 7
+    b+
+    dig 1
+    b+
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:240
+    // w = (w + BigUInt.from_bytes(R_AT_Z.bytes) + gamma) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:242
+    // s1 = (u * v) % q
+    uncover 3
+    uncover 3
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:242
+    // s1 = (u * v) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:243
+    // s1 = (s1 * w) % q
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:243
+    // s1 = (s1 * w) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:244
+    // s1 = (s1 * alpha) % q
+    frame_dig 2
+    dup
+    cover 7
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:244
+    // s1 = (s1 * alpha) % q
+    b%
+    cover 6
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:247
+    // betazeta = (beta * zeta) % q
+    swap
+    dig 4
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:247
+    // betazeta = (beta * zeta) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:248
+    // u = (betazeta + BigUInt.from_bytes(L_AT_Z.bytes) + gamma) % q
+    dup
+    dig 3
+    b+
+    dig 2
+    b+
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:248
+    // u = (betazeta + BigUInt.from_bytes(L_AT_Z.bytes) + gamma) % q
+    b%
+    cover 2
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:250
+    // v = (betazeta * VK_COSET_SHIFT) % q
+    dup
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:87
+    // VK_COSET_SHIFT = BigUInt(5)
+    byte 0x05
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:250
+    // v = (betazeta * VK_COSET_SHIFT) % q
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:250
+    // v = (betazeta * VK_COSET_SHIFT) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:251
+    // v = (v + BigUInt.from_bytes(R_AT_Z.bytes) + gamma) % q
+    dig 5
+    b+
+    dig 2
+    b+
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:251
+    // v = (v + BigUInt.from_bytes(R_AT_Z.bytes) + gamma) % q
+    b%
+    cover 2
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:246
+    // coset_square = (VK_COSET_SHIFT * VK_COSET_SHIFT) % q
+    byte 0x19
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:253
+    // w = (betazeta * coset_square) % q
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:253
+    // w = (betazeta * coset_square) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:254
+    // w = (w + BigUInt.from_bytes(O_AT_Z.bytes) + gamma) % q
+    frame_dig 31
+    dup
+    cover 5
+    b+
+    b+
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:254
+    // w = (w + BigUInt.from_bytes(O_AT_Z.bytes) + gamma) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:256
+    // s2 = (u * v) % q
+    cover 2
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:256
+    // s2 = (u * v) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:257
+    // s2 = q - ((s2 * w) % q)
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:257
+    // s2 = q - ((s2 * w) % q)
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:257
+    // s2 = q - ((s2 * w) % q)
+    swap
+    b-
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:258
+    // s2 = (s2 * alpha + alpha2Lagrange) % q
+    uncover 5
+    b*
+    frame_dig 10
+    b+
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:258
+    // s2 = (s2 * alpha + alpha2Lagrange) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:77
+    // VK_QL = Bytes.from_hex("305c147b6a09d2f7e2acdf861851b8ac623d25a75597d35ba3735a58e67c9f6f129928ef2bb2e2ce54ab6eda80aaf95f7d245d51ef945fe69f40064aca3bd402")
+    byte 0x305c147b6a09d2f7e2acdf861851b8ac623d25a75597d35ba3735a58e67c9f6f129928ef2bb2e2ce54ab6eda80aaf95f7d245d51ef945fe69f40064aca3bd402
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:260
+    // lin_poly_com = ec.scalar_mul(EC.BN254g1, VK_QL, L_AT_Z.bytes)
+    dig 3
+    ec_scalar_mul BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:78
+    // VK_QR = Bytes.from_hex("2f68cd6b764d1e653371272e3046a2558ab38ce37ecbc054bb7df37c31ee26392311d17830aa7d8795967086c0e4d4597d122176edce571c33a72b9773389396")
+    byte 0x2f68cd6b764d1e653371272e3046a2558ab38ce37ecbc054bb7df37c31ee26392311d17830aa7d8795967086c0e4d4597d122176edce571c33a72b9773389396
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:262
+    // add_term = ec.scalar_mul(EC.BN254g1, VK_QR, R_AT_Z.bytes)
+    dig 5
+    ec_scalar_mul BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:263
+    // lin_poly_com = ec.add(EC.BN254g1, lin_poly_com, add_term)
+    ec_add BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:79
+    // VK_QO = Bytes.from_hex("08d5e3211945e1064d319efc2aa9e80e349a8f52a79f0b5e0195d3b7051e3fd22839c621b767b84833009f879b41d5ed786b90c6fb7929bd917d2b958db887d2")
+    byte 0x08d5e3211945e1064d319efc2aa9e80e349a8f52a79f0b5e0195d3b7051e3fd22839c621b767b84833009f879b41d5ed786b90c6fb7929bd917d2b958db887d2
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:265
+    // add_term = ec.scalar_mul(EC.BN254g1, VK_QO, O_AT_Z.bytes)
+    dig 3
+    ec_scalar_mul BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:266
+    // lin_poly_com = ec.add(EC.BN254g1, lin_poly_com, add_term)
+    ec_add BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:268
+    // ab = (BigUInt.from_bytes(L_AT_Z.bytes) * BigUInt.from_bytes(R_AT_Z.bytes)) % q
+    dig 3
+    dig 5
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:268
+    // ab = (BigUInt.from_bytes(L_AT_Z.bytes) * BigUInt.from_bytes(R_AT_Z.bytes)) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:80
+    // VK_QM = Bytes.from_hex("1128d08f95967307ad395ce4e44be3e47b2b9c7f45de968b8c9d16bb2241cde2163c009aa8e38add58f57744e9cf748aa76eef80927d07f919653581ef52a9be")
+    byte 0x1128d08f95967307ad395ce4e44be3e47b2b9c7f45de968b8c9d16bb2241cde2163c009aa8e38add58f57744e9cf748aa76eef80927d07f919653581ef52a9be
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:269
+    // add_term = ec.scalar_mul(EC.BN254g1, VK_QM, ab.bytes)
+    swap
+    ec_scalar_mul BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:270
+    // lin_poly_com = ec.add(EC.BN254g1, lin_poly_com, add_term)
+    ec_add BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:81
+    // VK_QK = Bytes.from_hex("19fb4308d898dd03703da497566a1dfb167c0bb51a854be87c89d6d4be95a5ed02fb415e2059d31a2224f79f5069199ef99d9c40f39bfe8324aacfd438e26fbd")
+    byte 0x19fb4308d898dd03703da497566a1dfb167c0bb51a854be87c89d6d4be95a5ed02fb415e2059d31a2224f79f5069199ef99d9c40f39bfe8324aacfd438e26fbd
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:271
+    // lin_poly_com = ec.add(EC.BN254g1, lin_poly_com, VK_QK)
+    ec_add BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:85
+    // VK_S3 = Bytes.from_hex("1dc0f72e11743f4de272e2472f5442c2a877f9e42590c09639f5f248a761bb0623867e6560f209589bce52cbd0cc8fd5f943df4411c1428e804736f3527083c5")
+    byte 0x1dc0f72e11743f4de272e2472f5442c2a877f9e42590c09639f5f248a761bb0623867e6560f209589bce52cbd0cc8fd5f943df4411c1428e804736f3527083c5
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:273
+    // add_term = ec.scalar_mul(EC.BN254g1, VK_S3, s1.bytes)
+    uncover 7
+    ec_scalar_mul BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:274
+    // lin_poly_com = ec.add(EC.BN254g1, lin_poly_com, add_term)
+    ec_add BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:276
+    // add_term = ec.scalar_mul(EC.BN254g1, GRAND_PRODUCT, s2.bytes)
+    frame_dig 34
+    dup
+    cover 8
+    uncover 2
+    ec_scalar_mul BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:277
+    // lin_poly_com = ec.add(EC.BN254g1, lin_poly_com, add_term)
+    ec_add BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:279-280
+    // # generate challenge to fold the opening proofs
+    // r_pre = sha256(b'gamma' + UInt256(zeta).bytes + folded_h + lin_poly_com
+    dig 4
+    len
+    int 32
+    <=
+    assert // overflow
+    int 32
+    bzero
+    dig 5
+    dig 1
+    b|
+    byte "gamma"
+    dig 1
+    concat
+    dig 8
+    concat
+    dig 3
+    concat
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:279-281
+    // # generate challenge to fold the opening proofs
+    // r_pre = sha256(b'gamma' + UInt256(zeta).bytes + folded_h + lin_poly_com
+    // 	 + L_COM + R_COM + O_COM + VK_S1 + VK_S2 + QUOTIENT_POLY_AT_Z.bytes
+    frame_dig 23
+    dup
+    cover 4
+    concat
+    frame_dig 24
+    dup
+    cover 8
+    concat
+    frame_dig 25
+    dup
+    cover 9
+    concat
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:83
+    // VK_S1 = Bytes.from_hex("2c470ee98067e88a6f598fcf466dbb1347c6d37fd29469d58f56148f3b771d1a2231c4c19478ed72b24e62019543668746651759eeeb234b68a11a1273c12f4b")
+    byte 0x2c470ee98067e88a6f598fcf466dbb1347c6d37fd29469d58f56148f3b771d1a2231c4c19478ed72b24e62019543668746651759eeeb234b68a11a1273c12f4b
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:279-281
+    // # generate challenge to fold the opening proofs
+    // r_pre = sha256(b'gamma' + UInt256(zeta).bytes + folded_h + lin_poly_com
+    // 	 + L_COM + R_COM + O_COM + VK_S1 + VK_S2 + QUOTIENT_POLY_AT_Z.bytes
+    concat
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:84
+    // VK_S2 = Bytes.from_hex("13ef02390af37d851ece9a4f8b7705561a389681f3c380aef62cd9ff497ceb3412aac6955b0319626cb853ea937cbfd126047033302308758baa301c17d30775")
+    byte 0x13ef02390af37d851ece9a4f8b7705561a389681f3c380aef62cd9ff497ceb3412aac6955b0319626cb853ea937cbfd126047033302308758baa301c17d30775
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:279-281
+    // # generate challenge to fold the opening proofs
+    // r_pre = sha256(b'gamma' + UInt256(zeta).bytes + folded_h + lin_poly_com
+    // 	 + L_COM + R_COM + O_COM + VK_S1 + VK_S2 + QUOTIENT_POLY_AT_Z.bytes
+    concat
+    frame_dig 36
+    dup
+    cover 2
+    concat
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:279-282
+    // # generate challenge to fold the opening proofs
+    // r_pre = sha256(b'gamma' + UInt256(zeta).bytes + folded_h + lin_poly_com
+    // 	 + L_COM + R_COM + O_COM + VK_S1 + VK_S2 + QUOTIENT_POLY_AT_Z.bytes
+    // 	 + LINEAR_POLY_AT_Z.bytes + L_AT_Z.bytes + R_AT_Z.bytes
+    frame_dig 37
+    dup
+    cover 2
+    concat
+    dig 8
+    concat
+    dig 11
+    concat
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:279-283
+    // # generate challenge to fold the opening proofs
+    // r_pre = sha256(b'gamma' + UInt256(zeta).bytes + folded_h + lin_poly_com
+    // 	 + L_COM + R_COM + O_COM + VK_S1 + VK_S2 + QUOTIENT_POLY_AT_Z.bytes
+    // 	 + LINEAR_POLY_AT_Z.bytes + L_AT_Z.bytes + R_AT_Z.bytes
+    // 	 + O_AT_Z.bytes + S1_AT_Z.bytes + S2_AT_Z.bytes
+    dig 7
+    concat
+    frame_dig 32
+    dup
+    cover 12
+    concat
+    frame_dig 33
+    dup
+    cover 13
+    concat
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:279-284
+    // # generate challenge to fold the opening proofs
+    // r_pre = sha256(b'gamma' + UInt256(zeta).bytes + folded_h + lin_poly_com
+    // 	 + L_COM + R_COM + O_COM + VK_S1 + VK_S2 + QUOTIENT_POLY_AT_Z.bytes
+    // 	 + LINEAR_POLY_AT_Z.bytes + L_AT_Z.bytes + R_AT_Z.bytes
+    // 	 + O_AT_Z.bytes + S1_AT_Z.bytes + S2_AT_Z.bytes
+    // 	 + GRAND_PRODUCT_AT_Z_OMEGA.bytes)
+    dig 17
+    concat
+    sha256
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:285
+    // r = curvemod(r_pre)
+    callsub curvemod
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:290
+    // add_term = ec.scalar_mul(EC.BN254g1, lin_poly_com, r_acc.bytes)
+    uncover 6
+    dig 1
+    ec_scalar_mul BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:291
+    // digest = ec.add(EC.BN254g1, digest, add_term)
+    uncover 15
+    swap
+    ec_add BN254g1
+    swap
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:293
+    // + (BigUInt.from_bytes(LINEAR_POLY_AT_Z.bytes) * r_acc)
+    uncover 2
+    dig 1
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:292-293
+    // claims = (BigUInt.from_bytes(QUOTIENT_POLY_AT_Z.bytes)
+    // 		  + (BigUInt.from_bytes(LINEAR_POLY_AT_Z.bytes) * r_acc)
+    uncover 3
+    b+
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:292-294
+    // claims = (BigUInt.from_bytes(QUOTIENT_POLY_AT_Z.bytes)
+    // 		  + (BigUInt.from_bytes(LINEAR_POLY_AT_Z.bytes) * r_acc)
+    // 		 ) % q
+    b%
+    swap
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:296
+    // r_acc = (r_acc * r) % q
+    dup
+    dig 1
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:296
+    // r_acc = (r_acc * r) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:297
+    // add_term = ec.scalar_mul(EC.BN254g1, L_COM, r_acc.bytes)
+    uncover 6
+    dig 1
+    ec_scalar_mul BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:298
+    // digest = ec.add(EC.BN254g1, digest, add_term)
+    uncover 4
+    swap
+    ec_add BN254g1
+    cover 2
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:299
+    // claims = (claims + (BigUInt.from_bytes(L_AT_Z.bytes) * r_acc)) % q
+    uncover 7
+    dig 1
+    b*
+    uncover 4
+    b+
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:299
+    // claims = (claims + (BigUInt.from_bytes(L_AT_Z.bytes) * r_acc)) % q
+    b%
+    swap
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:301
+    // r_acc = (r_acc * r) % q
+    dig 2
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:301
+    // r_acc = (r_acc * r) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:302
+    // add_term = ec.scalar_mul(EC.BN254g1, R_COM, r_acc.bytes)
+    uncover 7
+    dig 1
+    ec_scalar_mul BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:303
+    // digest = ec.add(EC.BN254g1, digest, add_term)
+    uncover 4
+    swap
+    ec_add BN254g1
+    cover 2
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:304
+    // claims = (claims + (BigUInt.from_bytes(R_AT_Z.bytes) * r_acc)) % q
+    uncover 10
+    dig 1
+    b*
+    uncover 2
+    b+
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:304
+    // claims = (claims + (BigUInt.from_bytes(R_AT_Z.bytes) * r_acc)) % q
+    b%
+    swap
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:306
+    // r_acc = (r_acc * r) % q
+    dig 3
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:306
+    // r_acc = (r_acc * r) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:307
+    // add_term = ec.scalar_mul(EC.BN254g1, O_COM, r_acc.bytes)
+    uncover 7
+    dig 1
+    ec_scalar_mul BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:308
+    // digest = ec.add(EC.BN254g1, digest, add_term)
+    uncover 3
+    swap
+    ec_add BN254g1
+    cover 2
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:309
+    // claims = (claims + (BigUInt.from_bytes(O_AT_Z.bytes) * r_acc)) % q
+    uncover 6
+    dig 1
+    b*
+    uncover 2
+    b+
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:309
+    // claims = (claims + (BigUInt.from_bytes(O_AT_Z.bytes) * r_acc)) % q
+    b%
+    swap
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:311
+    // r_acc = (r_acc * r) % q
+    dig 3
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:311
+    // r_acc = (r_acc * r) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:83
+    // VK_S1 = Bytes.from_hex("2c470ee98067e88a6f598fcf466dbb1347c6d37fd29469d58f56148f3b771d1a2231c4c19478ed72b24e62019543668746651759eeeb234b68a11a1273c12f4b")
+    byte 0x2c470ee98067e88a6f598fcf466dbb1347c6d37fd29469d58f56148f3b771d1a2231c4c19478ed72b24e62019543668746651759eeeb234b68a11a1273c12f4b
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:312
+    // add_term = ec.scalar_mul(EC.BN254g1, VK_S1, r_acc.bytes)
+    dig 1
+    ec_scalar_mul BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:313
+    // digest = ec.add(EC.BN254g1, digest, add_term)
+    uncover 3
+    swap
+    ec_add BN254g1
+    cover 2
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:314
+    // claims = (claims + (BigUInt.from_bytes(S1_AT_Z.bytes) * r_acc)) % q
+    uncover 6
+    dig 1
+    b*
+    uncover 2
+    b+
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:314
+    // claims = (claims + (BigUInt.from_bytes(S1_AT_Z.bytes) * r_acc)) % q
+    b%
+    swap
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:316
+    // r_acc = (r_acc * r) % q
+    dig 3
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:316
+    // r_acc = (r_acc * r) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:84
+    // VK_S2 = Bytes.from_hex("13ef02390af37d851ece9a4f8b7705561a389681f3c380aef62cd9ff497ceb3412aac6955b0319626cb853ea937cbfd126047033302308758baa301c17d30775")
+    byte 0x13ef02390af37d851ece9a4f8b7705561a389681f3c380aef62cd9ff497ceb3412aac6955b0319626cb853ea937cbfd126047033302308758baa301c17d30775
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:317
+    // add_term = ec.scalar_mul(EC.BN254g1, VK_S2, r_acc.bytes)
+    dig 1
+    ec_scalar_mul BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:318
+    // digest = ec.add(EC.BN254g1, digest, add_term)
+    uncover 3
+    swap
+    ec_add BN254g1
+    swap
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:319
+    // claims = (claims + (BigUInt.from_bytes(S2_AT_Z.bytes) * r_acc)) % q
+    uncover 6
+    b*
+    uncover 2
+    b+
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:319
+    // claims = (claims + (BigUInt.from_bytes(S2_AT_Z.bytes) * r_acc)) % q
+    b%
+    cover 2
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:321-322
+    // # verify the folded proof
+    // r_pre = sha256(digest + BATCH_OPENING_AT_Z + GRAND_PRODUCT + OPENING_AT_Z_OMEGA + UInt256(zeta).bytes + UInt256(r).bytes)
+    dup
+    frame_dig 38
+    dup
+    cover 2
+    concat
+    dig 8
+    concat
+    frame_dig 39
+    dup
+    cover 2
+    concat
+    uncover 6
+    concat
+    dig 4
+    len
+    int 32
+    <=
+    assert // overflow
+    uncover 4
+    uncover 6
+    b|
+    concat
+    sha256
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:323
+    // r = curvemod(r_pre)
+    callsub curvemod
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:326
+    // add_term = ec.scalar_mul(EC.BN254g1, OPENING_AT_Z_OMEGA, r.bytes)
+    dup2
+    ec_scalar_mul BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:327
+    // quotient = ec.add(EC.BN254g1, quotient, add_term)
+    dig 3
+    swap
+    ec_add BN254g1
+    cover 6
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:329
+    // add_term = ec.scalar_mul(EC.BN254g1, GRAND_PRODUCT, r.bytes)
+    uncover 7
+    dig 1
+    ec_scalar_mul BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:330
+    // digest = ec.add(EC.BN254g1, digest, add_term)
+    uncover 4
+    swap
+    ec_add BN254g1
+    swap
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:332-333
+    // 	claims = (claims + (BigUInt.from_bytes(GRAND_PRODUCT_AT_Z_OMEGA.bytes)
+    //        		  * r)) % q
+    uncover 7
+    dig 1
+    b*
+    uncover 5
+    b+
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:332-333
+    // 	claims = (claims + (BigUInt.from_bytes(GRAND_PRODUCT_AT_Z_OMEGA.bytes)
+    //        		  * r)) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:334
+    // G1_SRS = UInt256(G1_SRS_X).bytes + UInt256(G1_SRS_Y).bytes
+    byte 0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:335
+    // claims_com = ec.scalar_mul(EC.BN254g1, G1_SRS, claims.bytes)
+    swap
+    ec_scalar_mul BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:337
+    // digest = ec.add(EC.BN254g1, digest, invert(claims_com))
+    callsub invert
+    uncover 2
+    swap
+    ec_add BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:339
+    // points_quotient = ec.scalar_mul(EC.BN254g1, BATCH_OPENING_AT_Z, zeta.bytes)
+    uncover 3
+    dig 4
+    ec_scalar_mul BN254g1
+    swap
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:341
+    // zeta_omega = (zeta * VK_OMEGA) % q
+    uncover 4
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:75
+    // VK_OMEGA = BigUInt(6837567842312086091520287814181175430087169027974246751610506942214842701774)
+    byte 0x0f1ded1ef6e72f5bffc02c0edd9b0675e8302a41fc782d75893a7fa1470157ce
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:341
+    // zeta_omega = (zeta * VK_OMEGA) % q
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:341
+    // zeta_omega = (zeta * VK_OMEGA) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:342
+    // r = (r * zeta_omega) % q
+    uncover 3
+    b*
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:65
+    // q = BigUInt(R_MOD)
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:342
+    // r = (r * zeta_omega) % q
+    b%
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:343
+    // add_term = ec.scalar_mul(EC.BN254g1, OPENING_AT_Z_OMEGA, r.bytes)
+    uncover 3
+    swap
+    ec_scalar_mul BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:344
+    // points_quotient = ec.add(EC.BN254g1, points_quotient, add_term)
+    uncover 2
+    swap
+    ec_add BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:346
+    // digest = ec.add(EC.BN254g1, digest, points_quotient)
+    ec_add BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:347
+    // quotient = invert(quotient)
+    swap
+    callsub invert
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:354
+    // check = ec.pairing_check(EC.BN254g1, digest + quotient, g2)
+    concat
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:349-352
+    // g2 = (UInt256(G2_SRS_0_X_1).bytes + UInt256(G2_SRS_0_X_0).bytes
+    //    + UInt256(G2_SRS_0_Y_1).bytes + UInt256(G2_SRS_0_Y_0).bytes
+    //    + UInt256(G2_SRS_1_X_1).bytes + UInt256(G2_SRS_1_X_0).bytes
+    //    + UInt256(G2_SRS_1_Y_1).bytes + UInt256(G2_SRS_1_Y_0).bytes)
+    byte 0x1800deef121f1e76426a00665e5c4479674322d4f75edadd46debd5cd992f6ed198e9393920d483a7260bfb731fb5d25f1aa493335a9e71297e485b7aef312c212c85ea5db8c6deb4aab71808dcb408fe3d1e7690c43d37b4ce6cc0166fa7daa090689d0585ff075ec9e99ad690c3395bc4b313370b38ef355acdadcd122975b30441fd1b5d3370482c42152a8899027716989a6996c2535bc9f7fee8aaef79e26186a2d65ee4d2f9c9a5b91f86597d35f192cd120caf7e935d8443d1938e23d054793348f12c0cf5622c340573cb277586319de359ab9389778f689786b1e481970ea81dd6992adfbc571effb03503adbbb6a857f578403c6c40e22d65b3c02
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:354
+    // check = ec.pairing_check(EC.BN254g1, digest + quotient, g2)
+    ec_pairing_check BN254g1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:355
+    // return arc4.Bool(check)
+    byte 0x00
+    int 0
+    uncover 2
+    setbit
+    frame_bury 0
+    retsub
+
+
+// Verifier.curvemod(x: bytes) -> bytes:
+curvemod:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:370-371
+    // @subroutine
+    // def curvemod(x: Bytes) -> BigUInt:
+    proto 1 1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:373
+    // return BigUInt.from_bytes(x) % BigUInt(R_MOD)
+    frame_dig -1
+    byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+    b%
+    retsub
+
+
+// Verifier.expmod(base: bytes, exponent: bytes, modulus: bytes) -> bytes:
+expmod:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:359-360
+    // @subroutine
+    // def expmod(base: BigUInt, exponent: BigUInt, modulus: BigUInt) -> BigUInt:
+    proto 3 1
+    int 0
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:362
+    // result = BigUInt(1)
+    byte 0x01
+
+expmod_while_top@1:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:363
+    // while exponent > 0:
+    frame_dig -2
+    byte 0x
+    b>
+    bz expmod_after_while@5
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:364
+    // if exponent % 2 == 1:
+    frame_dig -2
+    byte 0x02
+    b%
+    byte 0x01
+    b==
+    frame_dig 1
+    frame_bury 0
+    bz expmod_after_if_else@4
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:365
+    // result = (result * base) % modulus
+    frame_dig 1
+    frame_dig -3
+    b*
+    frame_dig -1
+    b%
+    frame_bury 0
+
+expmod_after_if_else@4:
+    frame_dig 0
+    frame_bury 1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:366
+    // exponent = exponent // 2
+    frame_dig -2
+    byte 0x02
+    b/
+    frame_bury -2
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:367
+    // base = (base * base) % modulus
+    frame_dig -3
+    dup
+    b*
+    frame_dig -1
+    b%
+    frame_bury -3
+    b expmod_while_top@1
+
+expmod_after_while@5:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:368
+    // return result
+    frame_dig 1
+    frame_bury 0
+    retsub
+
+
+// Verifier.invert(p: bytes) -> bytes:
+invert:
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:375-376
+    // @subroutine
+    // def invert(p : Bytes) -> Bytes:
+    proto 1 1
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:378
+    // x = BigUInt.from_bytes(p[:32])
+    frame_dig -1
+    len
+    int 32
+    dig 1
+    <
+    swap
+    dup
+    int 32
+    uncover 3
+    select
+    frame_dig -1
+    int 0
+    dig 2
+    substring3
+    cover 2
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:379
+    // y = BigUInt.from_bytes(p[32:])
+    frame_dig -1
+    swap
+    uncover 2
+    substring3
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:380
+    // neg_y = BigUInt(P_MOD) - y
+    byte 0x30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47
+    swap
+    b-
+    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:381
+    // return x.bytes + UInt256(neg_y).bytes
+    dup
+    len
+    int 32
+    <=
+    assert // overflow
+    int 32
+    bzero
+    b|
+    concat
+    retsub
