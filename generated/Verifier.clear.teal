@@ -1,7 +1,7 @@
 #pragma version 10
 
 Verifier.Verifier.clear_state_program:
-    // /Users/giulio/dev/zkp/whitelist/generated/Verifier.py:37
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/generated/Verifier.py:37
     // class Verifier(py.ARC4Contract):
     int 1
     return

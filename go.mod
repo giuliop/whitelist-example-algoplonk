@@ -5,14 +5,15 @@ go 1.22.0
 toolchain go1.22.2
 
 require (
+	github.com/algorand/go-algorand-sdk/v2 v2.4.0
 	github.com/consensys/gnark v0.9.1
 	github.com/consensys/gnark-crypto v0.12.2-0.20231013160410-1f65e75b6dfb
 	github.com/giuliop/algoplonk v0.1.4
+	github.com/joho/godotenv v1.5.1
 )
 
 require (
 	github.com/algorand/avm-abi v0.1.1 // indirect
-	github.com/algorand/go-algorand-sdk/v2 v2.4.0 // indirect
 	github.com/algorand/go-codec/codec v1.1.10 // indirect
 	github.com/bits-and-blooms/bitset v1.13.0 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect

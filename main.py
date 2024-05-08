@@ -43,11 +43,6 @@ app_client = ak.ApplicationClient(
 
 
 def main():
-    ak.ensure_funded(algod_client, ak.EnsureBalanceParameters(
-        account_to_fund=signer_address,
-        min_spending_balance_micro_algos=1000000)
-    )
-
     # if needed, opt in the signer address to the application
     if not is_opted_in(signer_address):
         print("Opting in to the application...\n")

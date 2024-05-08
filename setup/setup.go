@@ -5,17 +5,26 @@
 package main
 
 import (
+	"context"
+	"encoding/base64"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"strconv"
 
+	"github.com/algorand/go-algorand-sdk/v2/crypto"
+	"github.com/algorand/go-algorand-sdk/v2/mnemonic"
+	"github.com/algorand/go-algorand-sdk/v2/transaction"
+	"github.com/algorand/go-algorand-sdk/v2/types"
 	"github.com/consensys/gnark-crypto/ecc"
 
-	"github.com/giuliop/whitelist-example-algoplonk/circuit"
+	"github.com/algorand/go-algorand-sdk/v2/client/v2/algod"
+	//"github.com/giuliop/whitelist-example-algoplonk/circuit"
+	"github.com/joho/godotenv"
 
-	ap "github.com/giuliop/algoplonk"
-	"github.com/giuliop/algoplonk/setup"
+	//ap "github.com/giuliop/algoplonk"
+	//"github.com/giuliop/algoplonk/setup"
 	"github.com/giuliop/algoplonk/testutils"
 	sdk "github.com/giuliop/algoplonk/testutils/algosdkwrapper"
 	"github.com/giuliop/algoplonk/verifier"
@@ -33,7 +42,39 @@ var (
 	mainContractPath = filepath.Join(baseDir, mainContractName+".py")
 	appIdPath        = filepath.Join(artefactsDirPath, "MainContractAppId")
 	verifierIdPath   = filepath.Join(artefactsDirPath, "VerifierAppId")
+	envPath          = filepath.Join(baseDir, ".env")
+
+	algodToken  string
+	algodUrl    string
+	algodClient *algod.Client
+	signer      crypto.Account
 )
+
+func init() {
+	// Load .env file
+	if err := godotenv.Load(envPath); err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+	algodToken = os.Getenv("ALGOD_TOKEN")
+	algodUrl = os.Getenv("ALGOD_SERVER") + ":" + os.Getenv("ALGOD_PORT")
+
+	var err error
+	algodClient, err = algod.MakeClient(algodUrl, algodToken)
+	if err != nil {
+		log.Fatalf("Failed to create algod client: %s", err)
+	}
+
+	signerMnemonic := os.Getenv("SIGNER_MNEMONIC")
+	signerPrivateKey, err := mnemonic.ToPrivateKey(signerMnemonic)
+	if err != nil {
+		log.Fatalf("Failed to get private key from mnemonic: %s", err)
+	}
+	signer, err = crypto.AccountFromPrivateKey(signerPrivateKey)
+	if err != nil {
+		log.Fatalf("Failed to get account from private key: %s", err)
+	}
+
+}
 
 func main() {
 	verifierAppId := setupVerifier()
@@ -45,30 +86,31 @@ func main() {
 func setupVerifier() (appId uint64) {
 
 	verifierName := verifier.VerifierContractName
-	verifierPath := filepath.Join(artefactsDirPath, verifierName+".py")
+	//verifierPath := filepath.Join(artefactsDirPath, verifierName+".py")
 
-	compiledCircuit, err := ap.Compile(&circuit.Circuit{}, curve, setup.Trusted)
-	if err != nil {
-		log.Fatalf("Error compiling circuit: %v", err)
-	}
+	//compiledCircuit, err := ap.Compile(&circuit.Circuit{}, curve, setup.Trusted)
+	//if err != nil {
+		//log.Fatalf("Error compiling circuit: %v", err)
+	//}
 
-	err = compiledCircuit.WritePuyaPyVerifier(verifierPath)
-	if err != nil {
-		log.Fatalf("Error writing verifier: %v", err)
-	}
+	//err = compiledCircuit.WritePuyaPyVerifier(verifierPath)
+	//if err != nil {
+		//log.Fatalf("Error writing verifier: %v", err)
+	//}
 
-	err = testutils.CompileWithPuyaPy(verifierPath, "")
-	if err != nil {
-		log.Fatalf("Error compiling with puyapy: %v", err)
-	}
+	//err = testutils.CompileWithPuyaPy(verifierPath, "")
+	//if err != nil {
+		//log.Fatalf("Error compiling with puyapy: %v", err)
+	//}
 
-	err = testutils.RenamePuyaPyOutput(verifier.VerifierContractName,
-		verifierName, artefactsDirPath)
-	if err != nil {
-		log.Fatalf("Error renaming %s: %v", verifierName, err)
-	}
+	//err = testutils.RenamePuyaPyOutput(verifier.VerifierContractName,
+		//verifierName, artefactsDirPath)
+	//if err != nil {
+		//log.Fatalf("Error renaming %s: %v", verifierName, err)
+	//}
 
-	appId, err = sdk.DeployArc4AppIfNeeded(verifierName, artefactsDirPath)
+    var err error
+	appId, err = DeployApp(verifierName, artefactsDirPath)
 	if err != nil {
 		log.Fatalf("Error deploying %s: %v", verifierName, err)
 	}
@@ -100,7 +142,7 @@ func setupMainContract(verifierAppId uint64) (appId uint64) {
 		log.Fatalf("Error substituting main contract template: %v", err)
 	}
 
-	appId, err = sdk.DeployArc4AppIfNeeded(mainContractName, artefactsDirPath)
+	appId, err = DeployApp(mainContractName, artefactsDirPath)
 	if err != nil {
 		log.Fatalf("Error deploying main contract: %v", err)
 	}
@@ -121,4 +163,90 @@ func GetSchema() *sdk.Arc32Schema {
 		log.Fatalf("Error reading main contract schema: %v", err)
 	}
 	return schema
+}
+
+func DeployApp(appName string, dir string,
+) (appId uint64, err error) {
+	approvalBin, err := CompileTealFromFile(filepath.Join(dir,
+		appName+".approval.teal"))
+	if err != nil {
+		return 0, fmt.Errorf("failed to read approval program: %v", err)
+	}
+	clearBin, err := CompileTealFromFile(filepath.Join(dir,
+		appName+".clear.teal"))
+	if err != nil {
+		return 0, fmt.Errorf("failed to read clear program: %v", err)
+	}
+	schema, err := sdk.ReadArc32Schema(filepath.Join(dir, appName+".arc32.json"))
+	if err != nil {
+		return 0, fmt.Errorf("failed to read arc32 schema: %v", err)
+	}
+
+	creator := signer
+	sp, err := algodClient.SuggestedParams().Do(context.Background())
+	if err != nil {
+		return 0, fmt.Errorf("failed to get suggested params: %v", err)
+	}
+	createMethod, err := schema.Contract.GetMethodByName("create")
+	if err != nil {
+		return 0, fmt.Errorf("failed to get create method: %v", err)
+	}
+	extraPages := uint32(len(approvalBin)) / 2048
+	if extraPages > 3 {
+		return 0, fmt.Errorf("approval program too large even for extra pages: "+
+			"%d bytes", len(approvalBin))
+	}
+	txn, err := transaction.MakeApplicationCreateTxWithExtraPages(
+		false, approvalBin, clearBin,
+		types.StateSchema{NumUint: schema.State.Global.NumUints,
+			NumByteSlice: schema.State.Global.NumByteSlices},
+		types.StateSchema{NumUint: schema.State.Local.NumUints,
+			NumByteSlice: schema.State.Local.NumByteSlices},
+		[][]byte{createMethod.GetSelector(), []byte(appName)},
+		nil, nil, nil,
+		sp, creator.Address, nil,
+		types.Digest{}, [32]byte{}, types.ZeroAddress, extraPages,
+	)
+	if err != nil {
+		return 0, fmt.Errorf("failed to make create txn: %v", err)
+	}
+
+	txid, stx, err := crypto.SignTransaction(creator.PrivateKey, txn)
+	if err != nil {
+		return 0, fmt.Errorf("failed to sign transaction: %v", err)
+	}
+	_, err = algodClient.SendRawTransaction(stx).Do(context.Background())
+	if err != nil {
+		return 0, fmt.Errorf("failed to send transaction: %v", err)
+	}
+	confirmedTxn, err := transaction.WaitForConfirmation(algodClient, txid,
+		4, context.Background())
+	if err != nil {
+		return 0, fmt.Errorf("error waiting for confirmation:  %v", err)
+	}
+
+	fmt.Printf("App %s created with id %d\n", appName,
+		confirmedTxn.ApplicationIndex)
+
+	return confirmedTxn.ApplicationIndex, nil
+}
+
+// CompileTealFromFile reads a teal file and returns a compiled b64 binary.
+// A local network must be running
+func CompileTealFromFile(tealFile string) ([]byte, error) {
+	teal, err := os.ReadFile(tealFile)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read %s from file: %v", tealFile, err)
+	}
+
+	result, err := algodClient.TealCompile(teal).Do(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("failed to compile %s: %v", tealFile, err)
+	}
+	binary, err := base64.StdEncoding.DecodeString(result.Result)
+	if err != nil {
+		log.Fatalf("failed to decode approval program: %v", err)
+	}
+
+	return binary, nil
 }
