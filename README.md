@@ -13,8 +13,8 @@ Let's explain how the application works and then discuss further technical detai
 ### How it works
 
 The application is composed of two smart contracts on chain:
-* the main contract ('app') with app id 660802663
-* the verifier contract ('verifier') with app id 660802607
+* the main contract ('app') with app id 682246016
+* the verifier contract ('verifier') with app id 682246002
 
 We'll discuss in the next section how they were generated, let's focus now on how to use them.
 
@@ -56,9 +56,9 @@ The main app is defined in `MainContract.py` (let's the lord of programmers be p
 The proof is saved to file by AlgoPlonk which wraps [gnark](https://github.com/Consensys/gnark) for circuit compilation and proof generation.
 The script in `main.py` reads it from file and passes it to the main app as a `DynamicArray[Bytes32]` where `Bytes32` is a `StaticArray` of 32 `Bytes`.
 
-One last thing: the prover and the verifier need to be follow the exact same protocol, which means that gnark, which we wrap to create the proofs, and AlgoPlonk, which generates the smart contracts verifiers, need to be in sync. For instance, this smart contract was generated with AlgoPlonk v0.1.4 (synced to gnark v.0.9.0) and you need to use that to create new proofs.
-
-AlgoPlonk v0.1.5, which wraps gnark v.0.10.0 that changed the proof protocol, would not generate compatible proofs.
+One last thing: the prover and the verifier need to be follow the exact same protocol, which means that gnark, which we wrap to create the proofs, and AlgoPlonk, which generates the smart contracts verifiers, need to be in sync.
+The current commit, v0.2, uses AlgoPlonk v0.1.5, which wraps gnark v0.10.0.
+The previous tagged commit, v0.1, uses AlgoPlonk v0.1.4, which wraps gnark v0.9.0, and was deployed to a different set of smart contract on TestNet (see that commit README).
 
 ---
 

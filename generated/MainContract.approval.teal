@@ -159,15 +159,9 @@ add_address_to_whitelist:
     int 145000
     int 0
     callsub ensure_budget
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:50-54
-    // # The verifier expects public inputs to be in the curve field, but an
-    // # Algorand address might represent a number larger than the field
-    // # modulus, so to be safe we take the address modulo the field modulus
-    // address_mod = Bytes32.from_bytes(
-    //     (py.BigUInt.from_bytes(address.bytes) % curve_mod).bytes)
-    frame_dig -2
     // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:54
     // (py.BigUInt.from_bytes(address.bytes) % curve_mod).bytes)
+    frame_dig -2
     byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
     b%
     // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:60
@@ -177,7 +171,7 @@ add_address_to_whitelist:
     concat
     // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:58
     // TemplateVar[UInt64]("VERIFIER_APP_ID"),
-    int 661286189
+    int 682246002
     // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:56-61
     // # Verify the proof by calling the deposit verifier app
     // verified = verify_proof(
@@ -197,7 +191,7 @@ add_address_to_whitelist:
     bz add_address_to_whitelist_after_if_else@2
     // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:63
     // return(String("Proof verification failed"))
-    byte "\x00\x19Proof verification failed"
+    byte 0x001950726f6f6620766572696669636174696f6e206661696c6564
     retsub
 
 add_address_to_whitelist_after_if_else@2:
@@ -209,7 +203,7 @@ add_address_to_whitelist_after_if_else@2:
     bnz add_address_to_whitelist_after_if_else@4
     // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:68
     // return(String("Sender address does not match authorized address"))
-    byte "\x000Sender address does not match authorized address"
+    byte 0x003053656e646572206164647265737320646f6573206e6f74206d6174636820617574686f72697a65642061646472657373
     retsub
 
 add_address_to_whitelist_after_if_else@4:
@@ -221,7 +215,7 @@ add_address_to_whitelist_after_if_else@4:
     app_local_put
     // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:71
     // return String("")
-    byte "\x00\x00"
+    byte 0x0000
     retsub
 
 

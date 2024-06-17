@@ -1,6 +1,6 @@
 // script to deploy the verifier smart contract and the application smart contract
 // on TestNet; will write the appId of the application smart contract to file at
-// the package const `appIdPath`
+// the package var `appIdPath`
 // Run with `go run setup.go` from its directory
 package main
 
@@ -20,14 +20,14 @@ import (
 	"github.com/consensys/gnark-crypto/ecc"
 
 	"github.com/algorand/go-algorand-sdk/v2/client/v2/algod"
-	//"github.com/giuliop/whitelist-example-algoplonk/circuit"
 	"github.com/joho/godotenv"
 
-	//ap "github.com/giuliop/algoplonk"
-	//"github.com/giuliop/algoplonk/setup"
+	ap "github.com/giuliop/algoplonk"
+	"github.com/giuliop/algoplonk/setup"
 	"github.com/giuliop/algoplonk/testutils"
 	sdk "github.com/giuliop/algoplonk/testutils/algosdkwrapper"
 	"github.com/giuliop/algoplonk/verifier"
+	"github.com/giuliop/whitelist-example-algoplonk/circuit"
 )
 
 const (
@@ -86,31 +86,30 @@ func main() {
 func setupVerifier() (appId uint64) {
 
 	verifierName := verifier.VerifierContractName
-	//verifierPath := filepath.Join(artefactsDirPath, verifierName+".py")
+	verifierPath := filepath.Join(artefactsDirPath, verifierName+".py")
 
-	//compiledCircuit, err := ap.Compile(&circuit.Circuit{}, curve, setup.Trusted)
-	//if err != nil {
-		//log.Fatalf("Error compiling circuit: %v", err)
-	//}
+	compiledCircuit, err := ap.Compile(&circuit.Circuit{}, curve, setup.Trusted)
+	if err != nil {
+		log.Fatalf("Error compiling circuit: %v", err)
+	}
 
-	//err = compiledCircuit.WritePuyaPyVerifier(verifierPath)
-	//if err != nil {
-		//log.Fatalf("Error writing verifier: %v", err)
-	//}
+	err = compiledCircuit.WritePuyaPyVerifier(verifierPath)
+	if err != nil {
+		log.Fatalf("Error writing verifier: %v", err)
+	}
 
-	//err = testutils.CompileWithPuyaPy(verifierPath, "")
-	//if err != nil {
-		//log.Fatalf("Error compiling with puyapy: %v", err)
-	//}
+	err = testutils.CompileWithPuyaPy(verifierPath, "")
+	if err != nil {
+		log.Fatalf("Error compiling with puyapy: %v", err)
+	}
 
-	//err = testutils.RenamePuyaPyOutput(verifier.VerifierContractName,
-		//verifierName, artefactsDirPath)
-	//if err != nil {
-		//log.Fatalf("Error renaming %s: %v", verifierName, err)
-	//}
+	err = testutils.RenamePuyaPyOutput(verifier.VerifierContractName,
+		verifierName, artefactsDirPath)
+	if err != nil {
+		log.Fatalf("Error renaming %s: %v", verifierName, err)
+	}
 
-    var err error
-	appId, err = DeployApp(verifierName, artefactsDirPath)
+	appId, err = deployApp(verifierName, artefactsDirPath)
 	if err != nil {
 		log.Fatalf("Error deploying %s: %v", verifierName, err)
 	}
@@ -142,7 +141,7 @@ func setupMainContract(verifierAppId uint64) (appId uint64) {
 		log.Fatalf("Error substituting main contract template: %v", err)
 	}
 
-	appId, err = DeployApp(mainContractName, artefactsDirPath)
+	appId, err = deployApp(mainContractName, artefactsDirPath)
 	if err != nil {
 		log.Fatalf("Error deploying main contract: %v", err)
 	}
@@ -156,23 +155,16 @@ func setupMainContract(verifierAppId uint64) (appId uint64) {
 	return appId
 }
 
-func GetSchema() *sdk.Arc32Schema {
-	schema, err := sdk.ReadArc32Schema(
-		filepath.Join(artefactsDir, mainContractName+".arc32.json"))
-	if err != nil {
-		log.Fatalf("Error reading main contract schema: %v", err)
-	}
-	return schema
-}
-
-func DeployApp(appName string, dir string,
-) (appId uint64, err error) {
-	approvalBin, err := CompileTealFromFile(filepath.Join(dir,
+// deployApp deploys an application to the blockchain from the teal files in:
+// `dir`/`appName`.approval.teal and `dir`/`appName`.clear.teal,
+// and the arc32 schema in `dir`/`appName`.arc32.json
+func deployApp(appName string, dir string) (appId uint64, err error) {
+	approvalBin, err := compileTealFromFile(filepath.Join(dir,
 		appName+".approval.teal"))
 	if err != nil {
 		return 0, fmt.Errorf("failed to read approval program: %v", err)
 	}
-	clearBin, err := CompileTealFromFile(filepath.Join(dir,
+	clearBin, err := compileTealFromFile(filepath.Join(dir,
 		appName+".clear.teal"))
 	if err != nil {
 		return 0, fmt.Errorf("failed to read clear program: %v", err)
@@ -231,9 +223,8 @@ func DeployApp(appName string, dir string,
 	return confirmedTxn.ApplicationIndex, nil
 }
 
-// CompileTealFromFile reads a teal file and returns a compiled b64 binary.
-// A local network must be running
-func CompileTealFromFile(tealFile string) ([]byte, error) {
+// compileTealFromFile reads a teal file and returns a compiled b64 binary.
+func compileTealFromFile(tealFile string) ([]byte, error) {
 	teal, err := os.ReadFile(tealFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read %s from file: %v", tealFile, err)
