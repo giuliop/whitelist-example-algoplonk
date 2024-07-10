@@ -10,6 +10,7 @@ from algopy.arc4 import (
     Address
 )
 
+
 Bytes32: typing.TypeAlias = StaticArray[Byte, typing.Literal[32]]
 
 curve_mod = 21888242871839275222246405745257275088548364400416034343698204186575808495617
@@ -51,7 +52,8 @@ class MainContract(py.ARC4Contract):
         # Algorand address might represent a number larger than the field
         # modulus, so to be safe we take the address modulo the field modulus
         address_mod = Bytes32.from_bytes(
-            (py.BigUInt.from_bytes(address.bytes) % curve_mod).bytes)
+            py.op.bzero(32) | (py.BigUInt.from_bytes(address.bytes) % curve_mod).bytes
+        )
 
         # Verify the proof by calling the deposit verifier app
         verified = verify_proof(

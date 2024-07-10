@@ -1,7 +1,7 @@
 #pragma version 10
 
 MainContract.MainContract.clear_state_program:
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:19
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:20
     // class MainContract(py.ARC4Contract):
     int 1
     return

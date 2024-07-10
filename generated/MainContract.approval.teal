@@ -1,7 +1,7 @@
 #pragma version 10
 
 MainContract.MainContract.approval_program:
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:19
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:20
     // class MainContract(py.ARC4Contract):
     method "create(string)void"
     method "update()void"
@@ -13,7 +13,7 @@ MainContract.MainContract.approval_program:
     err // reject transaction
 
 main_create_route@1:
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:23
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:24
     // @abimethod(create='require')
     txn OnCompletion
     !
@@ -21,17 +21,17 @@ main_create_route@1:
     txn ApplicationID
     !
     assert // is creating
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:19
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:20
     // class MainContract(py.ARC4Contract):
     txna ApplicationArgs 1
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:23
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:24
     // @abimethod(create='require')
     callsub create
     int 1
     return
 
 main_update_route@2:
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:28
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:29
     // @abimethod(allow_actions=["UpdateApplication", "DeleteApplication"])
     int 1
     txn OnCompletion
@@ -46,7 +46,7 @@ main_update_route@2:
     return
 
 main_opt_in_or_out_route@3:
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:33
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:34
     // @abimethod(allow_actions=["OptIn", "CloseOut"])
     int 1
     txn OnCompletion
@@ -61,18 +61,18 @@ main_opt_in_or_out_route@3:
     return
 
 main_add_address_to_whitelist_route@4:
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:38
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:39
     // @abimethod
     txn OnCompletion
     !
     assert // OnCompletion is NoOp
     txn ApplicationID
     assert // is not creating
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:19
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:20
     // class MainContract(py.ARC4Contract):
     txna ApplicationArgs 1
     txna ApplicationArgs 2
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:38
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:39
     // @abimethod
     callsub add_address_to_whitelist
     byte 0x151f7c75
@@ -83,17 +83,17 @@ main_add_address_to_whitelist_route@4:
     return
 
 main_is_on_whitelist_route@5:
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:73
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:75
     // @abimethod
     txn OnCompletion
     !
     assert // OnCompletion is NoOp
     txn ApplicationID
     assert // is not creating
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:19
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:20
     // class MainContract(py.ARC4Contract):
     txna ApplicationArgs 1
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:73
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:75
     // @abimethod
     callsub is_on_whitelist
     byte 0x151f7c75
@@ -106,11 +106,11 @@ main_is_on_whitelist_route@5:
 
 // MainContract.MainContract.create(name: bytes) -> void:
 create:
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:23-24
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:24-25
     // @abimethod(create='require')
     // def create(self, name: String) -> None:
     proto 1 0
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:26
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:27
     // self.app_name = name
     byte "app_name"
     frame_dig -1
@@ -120,11 +120,11 @@ create:
 
 // MainContract.MainContract.update() -> void:
 update:
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:28-29
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:29-30
     // @abimethod(allow_actions=["UpdateApplication", "DeleteApplication"])
     // def update(self) -> None:
     proto 0 0
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:31
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:32
     // assert Global.creator_address == Txn.sender
     global CreatorAddress
     txn Sender
@@ -135,18 +135,18 @@ update:
 
 // MainContract.MainContract.opt_in_or_out() -> void:
 opt_in_or_out:
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:33-34
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:34-35
     // @abimethod(allow_actions=["OptIn", "CloseOut"])
     // def opt_in_or_out(self) -> None:
     proto 0 0
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:36
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:37
     // return
     retsub
 
 
 // MainContract.MainContract.add_address_to_whitelist(address: bytes, proof: bytes) -> bytes:
 add_address_to_whitelist:
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:38-43
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:39-44
     // @abimethod
     // def add_address_to_whitelist(
     //     self,
@@ -154,25 +154,28 @@ add_address_to_whitelist:
     //     proof: DynamicArray[Bytes32]
     // ) -> String:
     proto 2 1
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:48
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:49
     // py.ensure_budget(verifier_budget, fee_source=py.OpUpFeeSource.GroupCredit)
     int 145000
     int 0
     callsub ensure_budget
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:54
-    // (py.BigUInt.from_bytes(address.bytes) % curve_mod).bytes)
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:55
+    // py.op.bzero(32) | (py.BigUInt.from_bytes(address.bytes) % curve_mod).bytes
+    int 32
+    bzero
     frame_dig -2
     byte 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
     b%
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:60
+    b|
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:62
     // DynamicArray(address_mod.copy())
     byte 0x0001
     swap
     concat
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:58
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:60
     // TemplateVar[UInt64]("VERIFIER_APP_ID"),
-    int 682246002
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:56-61
+    int 698475927
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:58-63
     // # Verify the proof by calling the deposit verifier app
     // verified = verify_proof(
     //     TemplateVar[UInt64]("VERIFIER_APP_ID"),
@@ -184,36 +187,40 @@ add_address_to_whitelist:
     callsub verify_proof
     pop
     frame_bury -1
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:62
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:64
     // if not verified:
     byte 0x00
     ==
     bz add_address_to_whitelist_after_if_else@2
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:63
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:65
     // return(String("Proof verification failed"))
     byte 0x001950726f6f6620766572696669636174696f6e206661696c6564
     retsub
 
 add_address_to_whitelist_after_if_else@2:
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:67
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:69
     // if not Txn.sender == account:
     txn Sender
     frame_dig -2
     ==
     bnz add_address_to_whitelist_after_if_else@4
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:68
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:70
     // return(String("Sender address does not match authorized address"))
     byte 0x003053656e646572206164647265737320646f6573206e6f74206d6174636820617574686f72697a65642061646472657373
     retsub
 
 add_address_to_whitelist_after_if_else@4:
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:70
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:72
     // self.whitelist[account] = True
     frame_dig -2
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:22
+    // self.whitelist = LocalState(bool)
     byte "whitelist"
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:72
+    // self.whitelist[account] = True
     int 1
     app_local_put
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:71
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:73
     // return String("")
     byte 0x0000
     retsub
@@ -275,7 +282,7 @@ ensure_budget_after_while@7:
 
 // MainContract.verify_proof(app_id: uint64, proof: bytes, public_inputs: bytes) -> bytes, bytes, bytes:
 verify_proof:
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:84-89
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:86-91
     // @subroutine
     // def verify_proof(
     //     app_id: UInt64,
@@ -283,7 +290,7 @@ verify_proof:
     //     public_inputs: DynamicArray[Bytes32]
     // ) -> Bool:
     proto 3 3
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:91-97
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:93-99
     // verified = itxn.ApplicationCall(
     //     app_id=app_id,
     //     fee=0,
@@ -292,11 +299,11 @@ verify_proof:
     //     on_completion=py.OnCompleteAction.NoOp
     // ).submit().last_log
     itxn_begin
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:96
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:98
     // on_completion=py.OnCompleteAction.NoOp
     int NoOp
     itxn_field OnCompletion
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:94
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:96
     // app_args=(arc4_signature("verify(byte[32][],byte[32][])bool"),
     method "verify(byte[32][],byte[32][])bool"
     itxn_field ApplicationArgs
@@ -306,15 +313,15 @@ verify_proof:
     itxn_field ApplicationArgs
     frame_dig -3
     itxn_field ApplicationID
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:91
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:93
     // verified = itxn.ApplicationCall(
     int appl
     itxn_field TypeEnum
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:93
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:95
     // fee=0,
     int 0
     itxn_field Fee
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:91-97
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:93-99
     // verified = itxn.ApplicationCall(
     //     app_id=app_id,
     //     fee=0,
@@ -324,7 +331,7 @@ verify_proof:
     // ).submit().last_log
     itxn_submit
     itxn LastLog
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:98
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:100
     // return Bool.from_log(verified)
     dup
     extract 4 0
@@ -340,34 +347,38 @@ verify_proof:
 
 // MainContract.MainContract.is_on_whitelist(address: bytes) -> bytes:
 is_on_whitelist:
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:73-74
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:75-76
     // @abimethod
     // def is_on_whitelist(self, address: Address) -> Bool:
     proto 1 1
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:77
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:79
     // opted_in = account.is_opted_in(Global.current_application_id)
     frame_dig -1
     global CurrentApplicationID
     app_opted_in
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:78
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:80
     // if not opted_in:
     bnz is_on_whitelist_after_if_else@2
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:79
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:81
     // return Bool(False)
     byte 0x00
     retsub
 
 is_on_whitelist_after_if_else@2:
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:80
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:82
     // whitelisted = self.whitelist.get(account, False)
     frame_dig -1
     int 0
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:22
+    // self.whitelist = LocalState(bool)
     byte "whitelist"
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:82
+    // whitelisted = self.whitelist.get(account, False)
     app_local_get_ex
     int 0
     cover 2
     select
-    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:81
+    // /home/gws/dev/algorand/zkp/whitelist-example-algoplonk/MainContract.py:83
     // return Bool(whitelisted)
     byte 0x00
     int 0
